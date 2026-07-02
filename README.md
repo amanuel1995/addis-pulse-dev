@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AddisPulse Media
 
-## Getting Started
+AddisPulse Media is a smart mobility advertising platform that bridges offline and online experiences through QR-enabled campaigns in Addis Ababa. Passengers scan QR codes inside ride-share vehicles to access dynamic, campaign-specific landing pages and claim rewards via an OTP-verified lead capture system.
 
-First, run the development server:
+## 🚀 Tech Stack
 
+- **Framework:** Next.js 14 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS + shadcn/ui
+- **Database & Auth:** Supabase (PostgreSQL, Auth, Realtime, Storage)
+- **Email:** Resend
+- **SMS / OTP:** Africa's Talking
+- **Bot Integrations:** Telegram Bot API (Ops & Driver Operations)
+
+## 📁 Architecture Overview
+
+- **Foundation Layer:** Supabase DB schema (`supabase/migrations/`) handles RBAC, company profiles, and permanent QR routing.
+- **Campaign Layer:** Dynamic mapping of permanent driver QR tokens (`/d/[qr_token]`) to active advertiser campaigns.
+- **Lead Capture:** High-conversion, bilingual (Amharic/English) landing pages with Africa's Talking SMS OTP verification.
+- **Fraud Prevention:** Multi-layer fraud detection (device fingerprinting, IP hashing, duplicate checking, and scan velocity monitoring).
+
+## 🛠 Local Setup
+
+### 1. Prerequisites
+- Node.js (v18+)
+- npm
+- Supabase account (or local Supabase CLI)
+
+### 2. Install Dependencies
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
+### 3. Environment Variables
+Copy the example environment file and fill in your credentials:
+```bash
+cp .env.example .env.local
+```
+*(Ensure `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are populated at a minimum).*
+
+### 4. Database Setup
+Execute the migration file located at `supabase/migrations/20260702000000_initial_schema.sql` against your Supabase project's SQL editor to generate the 16 tables, custom enum types, utility functions, and Row-Level Security (RLS) policies.
+
+### 5. Run the Development Server
+```bash
+npm run dev
+```
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🗄 Project Structure
+- `/src/app` - Next.js App Router pages and API routes.
+- `/src/lib/supabase` - Supabase SSR client utilities and session middleware.
+- `/src/components` - Reusable UI components (shadcn/ui).
+- `/supabase/migrations` - PostgreSQL schema migrations.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📄 License
+Private and Confidential — Bluecore Software PLC
