@@ -28,10 +28,12 @@ Always use all-lowercase, kebab-case formatting:
 
 ### The Pull Request (PR) Lifecycle
 1.  **Develop:** Commit atomic, logical changes locally to your feature branch.
-2.  **Draft PR:** Push to remote and immediately open a Draft PR against `main`.
-3.  **AI Code Review:** Invoke the AI Code Review Subagent to perform a static analysis of the branch against these standards (checking RLS, Next.js caching, etc.).
-4.  **Human Review:** Once the AI passes the code, request a review from a Lead Developer/Architect.
-5.  **Merge:** Squash and merge into `main`. Delete the feature branch.
+2.  **Local Test:** Before pushing, you MUST run a local build (`npm run build`) to guarantee there are zero compilation, typing, or SSR syntax errors.
+3.  **Draft PR:** Push to remote and immediately open a Draft PR against `main`.
+4.  **AI Code Review:** Invoke the AI Code Review Subagent to perform a static analysis of the branch against these standards (checking RLS, Next.js caching, etc.).
+5.  **QA / UAT Test:** Invoke the QA/UAT Tester agent to evaluate the deployment for visual appeal, UI/UX consistency, and functional correctness.
+6.  **Human Review:** Once the AI passes the code and QA approves the UI, request a review from a Lead Developer/Architect.
+7.  **Merge:** Squash and merge into `main`. Delete the feature branch.
 
 ---
 
