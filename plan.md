@@ -7,46 +7,43 @@
 
 ---
 
-## Phase 1 — Foundation (Weeks 1–6)
+## The New Milestone Breakdown
+*Note: The original 10-week chronological plan has been refactored into 4 logical feature milestones to prioritize the end-to-end passenger pilot flow first, followed by the backend engine, backoffice operations, and finally client/driver portals. This ensures all gaps identified in the business analysis are fully covered.*
 
-| Week | Focus | Branch | Status |
-|------|-------|--------|--------|
-| 1 | Project setup, auth, Supabase connection, DB schema, protected routes | `feature/supabase-vercel-foundation` | ✅ Done |
-| 2 | Company profile CRUD, logo upload, QR generation | `feature/company-profile-qr` | 🔲 Not started |
-| 3 | Public landing page — bilingual, ISR, video embed | `feature/nextjs-proxy-migration` | ⚠️ Partial — route shell + RPC done; lead form is hardcoded placeholder |
-| 4 | Lead form + OTP flow (Africa's Talking) + thank-you + inactive screens | `feature/lead-capture-otp` | 🟡 **Current** |
-| 5 | Real-time notifications (Supabase Realtime, Resend email, Telegram ops bot) | `feature/realtime-notifications` | 🔲 Not started |
-| 6 | Admin dashboard (lead list, search, filter, CSV export, audit log) | `feature/admin-dashboard` | 🔲 Not started |
+### Milestone 1: Core Passenger Flow (MVP Foundation)
+> **Goal:** A passenger can scan a QR, see a campaign, submit a lead, verify via OTP, and land on a thank-you page.
+- [x] Project setup, auth, Supabase connection, DB schema, protected routes (`feature/supabase-vercel-foundation`)
+- [x] CI/CD pipeline, Vercel deployments, Next.js proxy middleware, security headers
+- [x] Public landing page shell — bilingual, ISR (`feature/nextjs-proxy-migration`)
+- [ ] **Current:** Lead form + OTP flow (Africa's Talking) + thank-you + inactive screens (`feature/lead-capture-otp`)
 
-### What's Actually Built on `main` (verified 2026-07-09)
+### Milestone 2: Campaign & Driver Management (The Engine)
+> **Goal:** Admins can create advertisers, configure campaigns with rewards, register drivers, and assign permanent QRs.
+*Branch:* `feature/campaign-driver-mgmt`
+- [ ] Advertiser / Company profile CRUD & logo upload (Supabase Storage)
+- [ ] Campaign CRUD, reward configuration, target zones, and budget
+- [ ] Driver registration & Driver permanent QR generation (resolves to active campaign)
+- [ ] Driver campaign assignments (mapping driver to campaign)
 
-| File / Feature | Status | Notes |
-|---|---|---|
-| `src/lib/supabase/` (client, server, middleware) | ✅ Done | SSR helpers wired |
-| `src/proxy.ts` | ✅ Done | Middleware renamed from `middleware.ts` → `proxy.ts` |
-| `src/app/d/[qr_token]/page.tsx` | ⚠️ Partial | Route, RPC call, ISR `revalidate=60`, bilingual header done. **Lead form is `[placeholder]`** |
-| `supabase/migrations/20260702000000_initial_schema.sql` | ✅ Done | 16 tables, RLS, enums, indexes, `resolve_driver_campaign()` RPC |
-| `shadcn/ui` + `components.json` + `button.tsx` | ✅ Done | Component scaffold ready |
-| Company profile CRUD | ❌ Not built | No pages, no routes |
-| Logo upload (Supabase Storage) | ❌ Not built | — |
-| QR code generation | ❌ Not built | — |
-| Lead form | ❌ Not built | Placeholder only |
-| OTP flow | ❌ Not built | — |
+### Milestone 3: Admin Backoffice & Fraud Control
+> **Goal:** Ops team can monitor incoming leads in real-time, export data, and rely on automated fraud rules.
+*Branch:* `feature/admin-fraud-ops`
+- [ ] Admin dashboard (Global lead list, search, filter, CSV export, audit log)
+- [ ] Real-time notifications (Supabase Realtime, Resend email stub, Telegram Ops Bot)
+- [ ] Fraud detection logic (scan velocity, device fingerprint, duplicate phone)
+- [ ] IP & Device hashing implementation for Data Proclamation compliance
 
----
-
-## Phase 2 — AddisPulse Layer (Weeks 7–10)
-
-| Week | Focus | Branch | Status |
-|------|-------|--------|--------|
-| 7 | Campaign CRUD + driver management + driver QR resolution | `feature/campaign-driver-mgmt` | 🔲 Not started |
-| 8 | Fraud detection logic (velocity, device fingerprint, duplicate) | `feature/fraud-detection` | 🔲 Not started |
-| 9 | Advertiser dashboard + lead pipeline + driver leaderboard | `feature/advertiser-dashboard` | 🔲 Not started |
-| 10 | Telegram driver bot + compliance records + hardening + QA | `feature/telegram-driver-bot` | 🔲 Not started |
+### Milestone 4: Client Value & Driver Compliance
+> **Goal:** Advertisers can view their ROI dashboard, and drivers can check-in and report inventory via Telegram.
+*Branch:* `feature/client-driver-portals`
+- [ ] Advertiser Dashboard (Campaign stats, CPL, lead pipeline status updates, PDF report generation)
+- [ ] Driver Telegram Bot (Daily photo check-ins, inventory reporting, compliance score)
+- [ ] Inventory & Reward tracking (restock alerts, discrepancy flags)
+- [ ] Driver Leaderboard
 
 ---
 
-## Current Milestone — Week 4: `feature/lead-capture-otp`
+## Current Sprint — Milestone 1: `feature/lead-capture-otp`
 
 > **Goal:** A passenger who scans a QR code can submit their name + phone, receive an OTP SMS via Africa's Talking, verify it, and land on a thank-you screen. No lead is counted as `otp_verified` without phone confirmation.
 
@@ -74,11 +71,10 @@
 - [ ] `POST /api/v1/otp/verify`
   - Checks: expiry (10 min window), attempt count (max 3), `code_hash` match
   - On success: update `leads.verification_status = 'otp_verified'`
-  - Trigger: Supabase Realtime push + Resend email notification (wired up fully in Week 5)
+  - Trigger: Placeholder for Realtime push & Email (implemented in M3)
 
 ### Integrations
 - [ ] Africa's Talking SMS client (`src/lib/africas-talking.ts`)
-- [ ] Resend client stub (`src/lib/resend.ts`) — email notification placeholder for Week 5
 
 ### Security Checklist
 - [ ] No raw IPs or fingerprints stored — only salted hashes
@@ -101,6 +97,6 @@
 | 2026-07-02 | QR per-driver PERMANENT | No reprinting per campaign; `resolve_driver_campaign()` handles routing |
 | 2026-07-02 | Single-operator MVP (Bluecore only) | Avoids multi-tenant complexity; `company_id` FK keeps v2 path open |
 | 2026-07-02 | Africa's Talking for OTP SMS | ETH market presence, clean REST API, easy to swap for Ethio Telecom later |
-| 2026-07-02 | Telegram bot for driver ops (not native app) | Speed to pilot; native app after 3 paid campaigns + investment |
+| 2026-07-02 | Telegram bot for driver ops | Speed to pilot; native app after 3 paid campaigns + investment |
 | 2026-07-09 | Supabase retained (not Neon) | Realtime + Auth + Storage are hard requirements; Neon covers none of them |
-| 2026-07-09 | Week 2 (Company CRUD + QR) skipped in build order | Landing page shell already exists; completing the passenger flow (lead capture → OTP) is higher priority for pilot demo |
+| 2026-07-09 | Milestone Restructuring | Shifted from 10-week chronological to 4 logical feature milestones to group related functionality (e.g., Campaign CRUD + Driver QR, Ops + Fraud). |
