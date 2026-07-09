@@ -19,6 +19,10 @@ concurrency:
   group: cd-preview-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  statuses: write
+
 jobs:
   deploy-preview:
     name: Deploy to Vercel Preview
@@ -37,7 +41,7 @@ jobs:
           cache: 'npm'
 
       - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+        run: npm install --global vercel@41
 
       # Pull Vercel project config + preview environment variables
       - name: Pull Vercel environment (preview)

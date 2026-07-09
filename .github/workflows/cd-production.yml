@@ -16,6 +16,9 @@ concurrency:
   group: cd-production
   cancel-in-progress: false   # never cancel an in-flight production deploy
 
+permissions:
+  contents: read
+
 jobs:
   deploy-production:
     name: Deploy to Vercel Production
@@ -34,7 +37,7 @@ jobs:
           cache: 'npm'
 
       - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+        run: npm install --global vercel@41
 
       # Pull Vercel project config + production environment variables
       - name: Pull Vercel environment (production)
