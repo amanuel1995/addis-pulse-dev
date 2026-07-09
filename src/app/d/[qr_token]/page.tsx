@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
+import Image from 'next/image'
 
-export const revalidate = 60 // Revalidate cache every 60 seconds (absorb high traffic while keeping data fresh)
+export const revalidate = 60 // ISR: absorbs QR scan bursts while keeping data fresh
 
 interface PageProps {
   params: Promise<{ qr_token: string }>
@@ -16,12 +17,18 @@ export default async function DriverQRRoute({ params }: PageProps) {
     .rpc('resolve_driver_campaign', { p_qr_token: qr_token })
     .single()
 
-  const campaign = resolutionData as { 
-    driver_id: string; 
+  // C-2 fix: throw on transient DB errors so they are NOT ISR-cached as 404.
+  // Only call notFound() when the token genuinely has no active campaign.
+  if (resolveError) {
+    throw new Error(`Failed to resolve QR token: ${resolveError.message}`)
+  }
+
+  const campaign = resolutionData as {
+    driver_id: string;
     driver_name: string;
-    campaign_id: string; 
-    company_id: string; 
-    campaign_name: string; 
+    campaign_id: string;
+    company_id: string;
+    campaign_name: string;
     company_name: string;
     logo_url: string;
     brand_color: string;
@@ -29,8 +36,7 @@ export default async function DriverQRRoute({ params }: PageProps) {
     reward_desc: string;
   } | null
 
-  if (resolveError || !campaign) {
-    // If the token is invalid, missing, or inactive, return 404 for SEO/caching purposes
+  if (!campaign) {
     return notFound()
   }
 
@@ -58,10 +64,13 @@ export default async function DriverQRRoute({ params }: PageProps) {
       <main className="flex-1 p-6 max-w-md mx-auto w-full">
         {campaign.logo_url && (
           <div className="flex justify-center mb-8">
-            <img 
-              src={campaign.logo_url} 
-              alt={`${campaign.company_name} Logo`} 
-              className="h-20 object-contain" 
+            <Image
+              src={campaign.logo_url}
+              alt={`${campaign.company_name} Logo`}
+              width={200}
+              height={80}
+              className="h-20 w-auto object-contain"
+              priority
             />
           </div>
         )}
