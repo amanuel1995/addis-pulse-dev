@@ -10,6 +10,8 @@
 ## The New Milestone Breakdown
 *Note: The original 10-week chronological plan has been refactored into 4 logical feature milestones to prioritize the end-to-end passenger pilot flow first, followed by the backend engine, backoffice operations, and finally client/driver portals. This ensures all gaps identified in the business analysis are fully covered.*
 
+> **Branching Note:** Milestones are large logical groupings. A single milestone can (and often should) be broken down into multiple smaller feature branches and multiple Pull Requests to keep code reviews manageable.
+
 ### Milestone 1: Core Passenger Flow (MVP Foundation)
 > **Goal:** A passenger can scan a QR, see a campaign, submit a lead, verify via OTP, and land on a thank-you page.
 - [x] Project setup, auth, Supabase connection, DB schema, protected routes (`feature/supabase-vercel-foundation`)
