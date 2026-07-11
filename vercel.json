@@ -1,0 +1,36 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "installCommand": "npm ci",
+  "outputDirectory": ".next",
+
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "Content-Security-Policy", "value": "default-src 'none'; frame-ancestors 'none'" }
+      ]
+    },
+    {
+      "source": "/d/(.*)",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex" }
+      ]
+    }
+  ],
+
+  "functions": {
+    "src/app/api/v1/leads/route.ts": { "maxDuration": 10 },
+    "src/app/api/v1/otp/send/route.ts": { "maxDuration": 10 },
+    "src/app/api/v1/otp/verify/route.ts": { "maxDuration": 10 },
+    "src/app/api/v1/telegram/driver/route.ts": { "maxDuration": 30 },
+    "src/app/api/v1/telegram/ops/route.ts": { "maxDuration": 30 }
+  },
+
+  "crons": []
+}

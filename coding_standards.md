@@ -35,6 +35,9 @@ Always use all-lowercase, kebab-case formatting:
 6.  **Human Review:** Once the AI passes the code and QA approves the UI, request a review from a Lead Developer/Architect.
 7.  **Merge:** Squash and merge into `main`. Delete the feature branch.
 
+### Code Formatting & Whitespace
+*   **No Whitespace Diffs:** Never introduce whitespace-only diffs (e.g., changing indentation, adding trailing spaces, or reformatting unrelated code). This pollutes the git history and makes code review difficult. Your PR should only contain substantive changes related to the feature or bugfix.
+
 ---
 
 ## 3. Frontend & Next.js Guidelines (For Developers)
