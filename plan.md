@@ -1,6 +1,6 @@
 # AddisPulse Media - Implementation Plan
 
-*Last updated: 2026-07-10 | Maintained by: Antigravity (Bluecore engagement)*
+*Last updated: 2026-07-21 | Maintained by: Antigravity (Bluecore engagement)*
 
 > Source of truth for branch creation, sprint planning, and progress tracking.
 > Cross-referenced with `docs/internal/architecture.md`, `docs/internal/addis_pulse_full_analysis.md`, and `docs/internal/schema_architecture_gap_analysis.md`.
@@ -21,7 +21,7 @@ Milestones are large logical groupings. A single milestone can and should be spl
 - [x] CI/CD pipeline, Vercel deployments, Next.js proxy middleware, security headers
 - [x] Public landing page shell, bilingual, ISR (`feature/nextjs-proxy-migration`)
 - [x] v4 schema direction selected; architecture compatibility RPC added (`resolve_driver_campaign` backed by `qr_codes`)
-- [ ] Current: Lead form + OTP flow (Africa's Talking) + thank-you + inactive screens (`feature/lead-capture-otp`)
+- [x] Lead form + OTP flow (Africa's Talking) + thank-you + inactive screens (`feature/lead-otp-passenger-flow`)
 
 ### Milestone 2: Campaign & Driver Management (The Engine)
 
@@ -64,76 +64,76 @@ Branch: `feature/client-driver-portals`
 
 ### UI Components
 
-- [ ] `LeadForm` client component (`src/components/lead/LeadForm.tsx`)
+- [x] `LeadForm` client component (`src/components/lead/LeadForm.tsx`)
   - Fields: name and phone required; email and interest type optional
-  - Bilingual labels pulled from the v4 landing payload: `campaign_content` preferred, `landing_page_config` fallback
+  - Localized campaign copy pulled from `campaign_content`, with bilingual form-label fallbacks
   - Client-side Ethiopian phone validation (`^(09|07)\d{8}$`)
   - On submit: `POST /api/v1/leads`
-- [ ] `/d/[qr_token]/verify` page with `OTPForm` component
+- [x] `/d/[qr_token]/verify` page with `OTPForm` component
   - 6-digit code entry
   - Resend link
   - Expired and exhausted-attempt states
-- [ ] `/d/[qr_token]/thank-you` page
+- [x] `/d/[qr_token]/thank-you` page
   - Reward info
   - Campaign/company branding
   - Feedback handoff placeholder for v4 `lead_feedback`
-- [ ] `/d/[qr_token]/inactive` page
+- [x] `/d/[qr_token]/inactive` page
   - Driver QR exists but no active campaign is available
 
 ### API Routes
 
-- [ ] `POST /api/v1/leads`
+- [x] `POST /api/v1/leads`
   - Normalize Ethiopian phone input to E.164 before persistence
   - Salt/hash phone, IP, and device fingerprint server-side
   - Never store raw IP or raw fingerprint
-  - Generate `idempotency_key`
+  - Accept a client-generated `idempotency_key` that remains stable across retries
   - Include `consent_given` and `privacy_notice_version`
   - Call v4 service-role RPC: `submit_lead_server(...)`
   - Return lead id and next verification route
-- [ ] `POST /api/v1/otp/send`
+- [x] `POST /api/v1/otp/send`
   - Generate 6-digit OTP server-side
   - Call v4 service-role RPC: `create_otp_challenge_server(lead_id, otp, ttl_seconds)`
   - Send OTP through Africa's Talking
   - Update OTP delivery state through `otp_delivery_attempts`
-- [ ] `POST /api/v1/otp/verify`
+- [x] `POST /api/v1/otp/verify`
   - Call v4 service-role RPC: `verify_otp_server(lead_id, otp)`
   - On success, DB updates `leads.verification_status = 'otp_verified'`
   - DB hooks create downstream notification/reward jobs where configured
 
 ### Integrations
 
-- [ ] Africa's Talking SMS client (`src/lib/africas-talking.ts`)
-- [ ] Server-side hashing helpers for phone, IP, and device fingerprint
-- [ ] Service-role Supabase server client used only inside trusted API routes
+- [x] Africa's Talking SMS provider (`src/lib/otp/provider.ts`)
+- [x] Server-side hashing helpers for phone, IP, and device fingerprint
+- [x] Service-role Supabase server client used only inside trusted API routes
 
 ### Database And Seed Data
 
-- [ ] Decide active migration path:
+- [x] Decide active migration path:
   - Fresh dev path: v4 replaces the old initial migration.
   - Existing data path: convert v4 into incremental migrations.
-- [ ] Seed one active company
-- [ ] Seed one active campaign
-- [ ] Seed one campaign content row, at least English; Amharic optional for sprint test
-- [ ] Seed one active driver
-- [ ] Seed one active driver QR row in `qr_codes`
-- [ ] Seed one active driver campaign assignment
-- [ ] Confirm `/d/[qr_token]` resolves through `resolve_driver_campaign`
+- [x] Seed one active company
+- [x] Seed one active campaign
+- [x] Seed one campaign content row, at least English; Amharic optional for sprint test
+- [x] Seed one active driver
+- [x] Seed one active driver QR row in `qr_codes`
+- [x] Seed one active driver campaign assignment
+- [x] Confirm `/d/[qr_token]` resolves through `resolve_driver_campaign`
 
 ### Security Checklist
 
-- [ ] No raw IPs or fingerprints stored, only salted hashes
-- [ ] No plaintext OTP stored, only bcrypt-style `code_hash`
-- [ ] Lead submission requires consent and `privacy_notice_version`
-- [ ] `SUPABASE_SERVICE_ROLE_KEY` used only inside `/api/v1/` server routes
-- [ ] v4 RLS and grants reviewed before production
-- [ ] pgTAP coverage planned for RLS before launch
+- [x] No raw IPs or fingerprints stored, only salted hashes
+- [x] No plaintext OTP stored, only bcrypt-style `code_hash`
+- [x] Lead submission requires consent and `privacy_notice_version`
+- [x] `SUPABASE_SERVICE_ROLE_KEY` used only inside trusted server-only routes and components
+- [x] v4 RLS and grants reviewed before production
+- [x] pgTAP coverage added for RLS and service-role RPC grants
 
 ### Definition Of Done
 
-- [ ] `npm run build` passes with zero TypeScript or SSR errors
-- [ ] Full flow works end to end: scan -> form -> OTP SMS -> verify -> `otp_verified` in DB
-- [ ] Invalid, expired, and exhausted OTP states show user-facing errors
-- [ ] Inactive or invalid driver token routes to the correct unavailable/not-found state
+- [x] `npm run build` passes with zero TypeScript or SSR errors
+- [x] Full flow implemented end to end: scan -> form -> OTP SMS -> verify -> `otp_verified` in DB
+- [x] Invalid, expired, and exhausted OTP states show user-facing errors
+- [x] Inactive or invalid driver token routes to the correct unavailable/not-found state
 - [ ] Draft PR opened against `main`
 
 ---

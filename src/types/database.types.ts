@@ -2511,6 +2511,19 @@ export type Database = {
         Args: { p_locale?: string; p_public_path: string };
         Returns: Json;
       };
+      record_otp_delivery_attempt_server: {
+        Args: {
+          p_attempt_number: number;
+          p_destination_hash: string;
+          p_error_code?: string;
+          p_error_message?: string;
+          p_otp_verification_id: string;
+          p_provider: string;
+          p_provider_message_id?: string;
+          p_status: Database["public"]["Enums"]["otp_delivery_status"];
+        };
+        Returns: string;
+      };
       resolve_driver_campaign: {
         Args: { p_qr_token: string };
         Returns: {
