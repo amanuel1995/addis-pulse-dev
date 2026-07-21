@@ -1,9 +1,12 @@
 import "server-only";
 
 import { createRequire } from "node:module";
+import {
+  resolveOtpProviderName,
+  type OtpProviderName,
+} from "@/lib/otp/config";
 
 export type OtpDeliveryResult = {
-  provider: string;
   providerMessageId?: string;
 };
 
@@ -15,7 +18,7 @@ class FakeOtpProvider implements OtpProvider {
   async send(): Promise<OtpDeliveryResult> {
     if (process.env.OTP_FAKE_FAIL === "true")
       throw new Error("Fake OTP provider failure");
-    return { provider: "fake_local" };
+    return {};
   }
 }
 
@@ -60,14 +63,16 @@ class AfricaTalkingOtpProvider implements OtpProvider {
       );
     }
     return {
-      provider: "africas_talking",
       providerMessageId: recipient.messageId,
     };
   }
 }
 
-export function getOtpProvider(): OtpProvider {
-  return process.env.OTP_PROVIDER === "africas_talking"
-    ? new AfricaTalkingOtpProvider()
-    : new FakeOtpProvider();
+export function getOtpProvider(
+  providerName: OtpProviderName = resolveOtpProviderName(),
+): OtpProvider {
+  if (providerName === "africas_talking") {
+    return new AfricaTalkingOtpProvider();
+  }
+  return new FakeOtpProvider();
 }

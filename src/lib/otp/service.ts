@@ -1,7 +1,7 @@
 import "server-only";
 
-import { randomInt } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { generateOtpCode, resolveOtpProviderName } from "@/lib/otp/config";
 import { getOtpProvider } from "@/lib/otp/provider";
 import { hashPhone } from "@/lib/passenger-flow/security";
 
@@ -10,6 +10,7 @@ const RESEND_COOLDOWN_SECONDS = 60;
 export class OtpCooldownError extends Error {}
 
 export async function sendOtpForLead(leadId: string, phoneE164: string) {
+  const providerName = resolveOtpProviderName();
   const admin = createAdminClient();
   const cutoff = new Date(
     Date.now() - RESEND_COOLDOWN_SECONDS * 1000,
@@ -25,12 +26,7 @@ export async function sendOtpForLead(leadId: string, phoneE164: string) {
   if (recent)
     throw new OtpCooldownError("Please wait before requesting another code");
 
-  const code =
-    process.env.OTP_PROVIDER === "africas_talking"
-      ? randomInt(0, 1_000_000).toString().padStart(6, "0")
-      : process.env.OTP_FAKE_CODE || "123456";
-  if (!/^\d{6}$/.test(code))
-    throw new Error("OTP_FAKE_CODE must contain exactly six digits");
+  const code = generateOtpCode(providerName);
   const ttl = Math.min(
     Math.max(Number(process.env.OTP_EXPIRY_SECONDS || 300), 60),
     900,
@@ -45,13 +41,13 @@ export async function sendOtpForLead(leadId: string, phoneE164: string) {
   );
   if (challengeError) throw challengeError;
 
-  const provider = getOtpProvider();
+  const provider = getOtpProvider(providerName);
   try {
     const result = await provider.send({ phoneE164, code });
     const { error } = await admin.rpc("record_otp_delivery_attempt_server", {
       p_otp_verification_id: otpId,
       p_attempt_number: 1,
-      p_provider: result.provider,
+      p_provider: providerName,
       p_provider_message_id: result.providerMessageId,
       p_destination_hash: hashPhone(phoneE164),
       p_status: "accepted",
@@ -69,7 +65,7 @@ export async function sendOtpForLead(leadId: string, phoneE164: string) {
       {
         p_otp_verification_id: otpId,
         p_attempt_number: 1,
-        p_provider: process.env.OTP_PROVIDER || "fake_local",
+        p_provider: providerName,
         p_destination_hash: hashPhone(phoneE164),
         p_status: "failed",
         p_error_code: "provider_send_failed",
