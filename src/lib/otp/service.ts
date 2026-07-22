@@ -15,13 +15,21 @@ export async function sendOtpForLead(leadId: string, phoneE164: string) {
   const cutoff = new Date(
     Date.now() - RESEND_COOLDOWN_SECONDS * 1000,
   ).toISOString();
-  const { data: recent } = await admin
+  const { data: recent, error: cooldownLookupError } = await admin
     .from("otp_verifications")
     .select("id")
     .eq("lead_id", leadId)
     .in("status", ["created", "send_pending", "sent"])
     .gte("created_at", cutoff)
     .maybeSingle();
+
+  if (cooldownLookupError) {
+    console.error("OTP cooldown lookup failed", {
+      code: cooldownLookupError.code,
+      message: cooldownLookupError.message,
+    });
+    throw cooldownLookupError;
+  }
 
   if (recent)
     throw new OtpCooldownError("Please wait before requesting another code");

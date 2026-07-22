@@ -2,6 +2,7 @@
 
 import { FormEvent, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ETHIOPIAN_PHONE_INPUT_PATTERN } from "@/lib/passenger-flow/phone";
 
 export function LeadForm({
   qrToken,
@@ -69,7 +70,7 @@ export function LeadForm({
         type="tel"
         inputMode="tel"
         placeholder="0911 234 567"
-        pattern="(?:\+251|251|0)?[\s()-]*(?:7|9)(?:[\s()-]*[0-9]){8}"
+        pattern={ETHIOPIAN_PHONE_INPUT_PATTERN}
         title="Use an Ethiopian mobile number such as 0911234567 or +251 911 234 567"
         autoComplete="tel"
         required
