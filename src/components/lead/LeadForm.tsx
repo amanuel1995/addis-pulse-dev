@@ -71,7 +71,7 @@ export function LeadForm({
         inputMode="tel"
         placeholder="0911 234 567"
         pattern={ETHIOPIAN_PHONE_INPUT_PATTERN}
-        title="Use an Ethiopian mobile number such as 0911234567 or +251 911 234 567"
+        title="Use an Ethiopian mobile number such as 0911 234 567 or +251911234567"
         autoComplete="tel"
         required
       />

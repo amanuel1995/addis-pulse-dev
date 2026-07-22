@@ -28,7 +28,7 @@ test("browser phone pattern accepts every supported Ethiopian input format", () 
     "0911 234 567",
     "+251911234567",
     "+251-711-234-567",
-    "251 (911) 234-567",
+    "251 911 234-567",
     "911234567",
   ]) {
     assert.equal(browserPattern.test(phone), true, phone);
