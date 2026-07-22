@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(58);
+select plan(62);
 
 select is((select count(*) from public.companies), 2::bigint, 'seed has two companies');
 select is((select count(*) from public.campaigns), 2::bigint, 'seed has two campaigns');
@@ -139,10 +139,23 @@ select throws_ok(
   $$select public.create_otp_challenge_server('a0000000-0000-0000-0000-000000000002', '12345', 300)$$,
   '22023', 'otp_must_be_six_digits', 'OTP challenge rejects a non-six-digit code'
 );
-insert into public.otp_delivery_attempts (
-  otp_verification_id, attempt_number, destination_hash, status, accepted_at
-) select id, 1, 'fake-otp-destination-hash', 'accepted', now()
-  from public.otp_verifications where lead_id = 'a0000000-0000-0000-0000-000000000002' and status = 'created';
+select lives_ok(
+  $$select public.record_otp_delivery_attempt_server(
+      (select id from public.otp_verifications
+        where lead_id = 'a0000000-0000-0000-0000-000000000002' and status = 'created'),
+      1::smallint, 'fake_local', 'fake-otp-destination-hash', 'accepted'
+    )$$,
+  'service RPC records accepted OTP delivery'
+);
+select ok(not has_function_privilege('anon',
+  'public.record_otp_delivery_attempt_server(uuid,smallint,text,text,public.otp_delivery_status,text,text,text)',
+  'execute'), 'anonymous role cannot record OTP deliveries');
+select ok(not has_function_privilege('authenticated',
+  'public.record_otp_delivery_attempt_server(uuid,smallint,text,text,public.otp_delivery_status,text,text,text)',
+  'execute'), 'authenticated role cannot record OTP deliveries');
+select ok(has_function_privilege('service_role',
+  'public.record_otp_delivery_attempt_server(uuid,smallint,text,text,public.otp_delivery_status,text,text,text)',
+  'execute'), 'service role can record OTP deliveries');
 select is((select status from public.otp_verifications where lead_id = 'a0000000-0000-0000-0000-000000000002'),
   'sent'::public.otp_status, 'accepted delivery marks OTP sent');
 select throws_ok(

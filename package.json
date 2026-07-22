@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "node --experimental-test-isolation=none --test --experimental-strip-types tests/*.test.mts",
     "lint": "eslint",
     "typecheck": "tsc --noEmit"
   },
