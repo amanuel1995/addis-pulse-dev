@@ -28,13 +28,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "verification_failed" }, { status: 500 });
 
   if (!verified) {
-    const { data: otp } = await admin
+    const { data: otp, error: otpLookupError } = await admin
       .from("otp_verifications")
       .select("status, attempts, expires_at")
       .eq("lead_id", flow.leadId)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
+    if (otpLookupError) {
+      console.error("OTP verification state lookup failed", {
+        code: otpLookupError.code,
+        message: otpLookupError.message,
+      });
+      return NextResponse.json(
+        { error: "verification_failed" },
+        { status: 500 },
+      );
+    }
     const expired =
       otp?.status === "expired" ||
       (otp?.expires_at && Date.parse(otp.expires_at) <= Date.now());

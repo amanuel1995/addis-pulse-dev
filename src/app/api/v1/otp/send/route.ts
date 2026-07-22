@@ -21,11 +21,18 @@ export async function POST(request: NextRequest) {
     );
 
   const admin = createAdminClient();
-  const { data: lead } = await admin
+  const { data: lead, error: leadLookupError } = await admin
     .from("leads")
     .select("phone_e164, verification_status")
     .eq("id", flow.leadId)
     .maybeSingle();
+  if (leadLookupError) {
+    console.error("OTP lead lookup failed", {
+      code: leadLookupError.code,
+      message: leadLookupError.message,
+    });
+    return NextResponse.json({ error: "otp_send_failed" }, { status: 500 });
+  }
   if (!lead)
     return NextResponse.json({ error: "lead_not_found" }, { status: 404 });
   if (

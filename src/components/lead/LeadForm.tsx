@@ -69,8 +69,8 @@ export function LeadForm({
         type="tel"
         inputMode="tel"
         placeholder="0911 234 567"
-        pattern="(?:09|07)[0-9]{8}"
-        title="Use an Ethiopian mobile number such as 0911234567"
+        pattern="(?:\+251|251|0)?[\s()-]*(?:7|9)(?:[\s()-]*[0-9]){8}"
+        title="Use an Ethiopian mobile number such as 0911234567 or +251 911 234 567"
         autoComplete="tel"
         required
       />
