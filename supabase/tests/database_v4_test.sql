@@ -117,11 +117,59 @@ insert into public.notification_destinations (
   ('f9000000-0000-0000-0000-000000000003', 'f2000000-0000-0000-0000-000000000002', 'email', 'lead_verified', 'instant', 'pgtap.beta.leads@example.test', 'pgtap-destination-beta-leads', 'pgTAP lead inbox', true, true, 'f1000000-0000-0000-0000-000000000001'),
   ('f9000000-0000-0000-0000-000000000004', 'f2000000-0000-0000-0000-000000000002', 'telegram', 'feedback_received', 'instant', 'pgtap-beta-chat', 'pgtap-destination-beta-feedback', 'pgTAP feedback chat', true, true, 'f1000000-0000-0000-0000-000000000001');
 
-select plan(69);
+select plan(76);
 
 select is((select count(*) from public.companies where id in (
   'f2000000-0000-0000-0000-000000000001', 'f2000000-0000-0000-0000-000000000002'
 )), 2::bigint, 'fixtures include two companies');
+select lives_ok(
+  $$update public.companies
+    set description = 'Updated transactional pgTAP fixture company.'
+    where id = 'f2000000-0000-0000-0000-000000000001'$$,
+  'company updates do not access QR-only immutable fields'
+);
+select throws_ok(
+  $$update public.companies
+    set identifier = 'pgtap-alpha-health-renamed'
+    where id = 'f2000000-0000-0000-0000-000000000001'$$,
+  '23514', 'company_identifier_is_immutable',
+  'company identifier remains immutable'
+);
+select throws_ok(
+  $$update public.qr_codes
+    set token = gen_random_uuid()
+    where id = 'f8000000-0000-0000-0000-000000000011'$$,
+  '23514', 'qr_route_identity_is_immutable',
+  'QR token remains immutable'
+);
+select throws_ok(
+  $$update public.qr_codes
+    set public_path = 'd/pgtap-alpha-driver-renamed'
+    where id = 'f8000000-0000-0000-0000-000000000011'$$,
+  '23514', 'qr_route_identity_is_immutable',
+  'QR public path remains immutable'
+);
+select throws_ok(
+  $$update public.qr_codes
+    set qr_type = 'company'
+    where id = 'f8000000-0000-0000-0000-000000000011'$$,
+  '23514', 'qr_route_identity_is_immutable',
+  'QR type remains immutable'
+);
+select throws_ok(
+  $$update public.qr_codes
+    set company_id = 'f2000000-0000-0000-0000-000000000002'
+    where id = 'f8000000-0000-0000-0000-000000000011'$$,
+  '23514', 'qr_route_identity_is_immutable',
+  'QR company remains immutable'
+);
+select throws_ok(
+  $$update public.qr_codes
+    set driver_id = 'f6000000-0000-0000-0000-000000000002'
+    where id = 'f8000000-0000-0000-0000-000000000011'$$,
+  '23514', 'qr_route_identity_is_immutable',
+  'QR driver remains immutable'
+);
 select is((select count(*) from public.campaigns where id in (
   'f4000000-0000-0000-0000-000000000001', 'f4000000-0000-0000-0000-000000000002'
 )), 2::bigint, 'fixtures include two campaigns');
