@@ -117,7 +117,7 @@ insert into public.notification_destinations (
   ('f9000000-0000-0000-0000-000000000003', 'f2000000-0000-0000-0000-000000000002', 'email', 'lead_verified', 'instant', 'pgtap.beta.leads@example.test', 'pgtap-destination-beta-leads', 'pgTAP lead inbox', true, true, 'f1000000-0000-0000-0000-000000000001'),
   ('f9000000-0000-0000-0000-000000000004', 'f2000000-0000-0000-0000-000000000002', 'telegram', 'feedback_received', 'instant', 'pgtap-beta-chat', 'pgtap-destination-beta-feedback', 'pgTAP feedback chat', true, true, 'f1000000-0000-0000-0000-000000000001');
 
-select plan(65);
+select plan(67);
 
 select is((select count(*) from public.companies where id in (
   'f2000000-0000-0000-0000-000000000001', 'f2000000-0000-0000-0000-000000000002'
@@ -217,6 +217,26 @@ insert into public.leads (
    'f5000000-0000-0000-0000-000000000002', 'f6000000-0000-0000-0000-000000000003',
    'f8000000-0000-0000-0000-000000000013', 'Fake OTP Lead', '+251922000002',
    'pgtap-lead-phone-hash-2', 'submitted', 'pgtap-ip-hash-2', true, '2026-01-01 00:00:00+00', 'test-v1');
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', 'f1000000-0000-0000-0000-000000000002', true);
+select set_config('request.jwt.claims', '{"sub":"f1000000-0000-0000-0000-000000000002","role":"authenticated"}', true);
+select is(
+  (select array_agg(id order by id) from public.leads),
+  array['fa000000-0000-0000-0000-000000000001'::uuid],
+  'alpha representative sees the alpha pending lead only'
+);
+reset role;
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', 'f1000000-0000-0000-0000-000000000003', true);
+select set_config('request.jwt.claims', '{"sub":"f1000000-0000-0000-0000-000000000003","role":"authenticated"}', true);
+select is(
+  (select array_agg(id order by id) from public.leads),
+  array['fa000000-0000-0000-0000-000000000002'::uuid],
+  'beta representative sees the beta pending lead only'
+);
+reset role;
 
 select is((select count(*) from public.lead_quality_decisions where lead_id in (
   'fa000000-0000-0000-0000-000000000001', 'fa000000-0000-0000-0000-000000000002'
