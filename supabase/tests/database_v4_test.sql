@@ -117,7 +117,7 @@ insert into public.notification_destinations (
   ('f9000000-0000-0000-0000-000000000003', 'f2000000-0000-0000-0000-000000000002', 'email', 'lead_verified', 'instant', 'pgtap.beta.leads@example.test', 'pgtap-destination-beta-leads', 'pgTAP lead inbox', true, true, 'f1000000-0000-0000-0000-000000000001'),
   ('f9000000-0000-0000-0000-000000000004', 'f2000000-0000-0000-0000-000000000002', 'telegram', 'feedback_received', 'instant', 'pgtap-beta-chat', 'pgtap-destination-beta-feedback', 'pgTAP feedback chat', true, true, 'f1000000-0000-0000-0000-000000000001');
 
-select plan(67);
+select plan(69);
 
 select is((select count(*) from public.companies where id in (
   'f2000000-0000-0000-0000-000000000001', 'f2000000-0000-0000-0000-000000000002'
@@ -309,6 +309,14 @@ select ok(not has_function_privilege('authenticated',
 select ok(has_function_privilege('service_role',
   'public.record_otp_delivery_attempt_server(uuid,smallint,text,text,public.otp_delivery_status,text,text,text)',
   'execute'), 'service role can record OTP deliveries');
+select ok(
+  has_table_privilege('service_role', 'public.otp_verifications', 'select'),
+  'service role can inspect server-only OTP state'
+);
+select ok(
+  has_table_privilege('service_role', 'public.leads', 'select,insert,update,delete'),
+  'service role has explicit trusted lead data access'
+);
 select is((select status from public.otp_verifications where lead_id = 'fa000000-0000-0000-0000-000000000002'),
   'sent'::public.otp_status, 'accepted delivery marks OTP sent');
 select throws_ok(
