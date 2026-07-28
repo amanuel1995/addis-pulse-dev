@@ -3,7 +3,10 @@ import { CampaignLanding } from "@/components/passenger/CampaignLanding";
 import { createClient } from "@/lib/supabase/server";
 import type { PublicLandingPayload } from "@/types/passenger";
 
-export const revalidate = 60;
+// Driver assignments and campaign availability can change at any time. Avoid
+// serving a cached unavailable result after an assignment is activated (or a
+// cached active campaign after it is removed).
+export const dynamic = "force-dynamic";
 
 type DriverResolution = { driver_name: string };
 

@@ -22,7 +22,7 @@ export function LeadForm({
   companyName: string;
 }) {
   const router = useRouter();
-  const idempotencyKey = useRef(crypto.randomUUID());
+  const idempotencyKey = useRef<string | null>(null);
   const [values, setValues] = useState({ fullName: "", phone: "", email: "", interestedService: "" });
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +46,10 @@ export function LeadForm({
     setError(null);
 
     try {
+      // Generate browser-only entropy in response to user interaction. Calling
+      // crypto.randomUUID() during render can fail during Server Component
+      // prerendering and also produces a different value during hydration.
+      idempotencyKey.current ??= crypto.randomUUID();
       const response = await fetch("/api/v1/leads", {
         method: "POST",
         headers: { "content-type": "application/json", "x-device-fingerprint": getDeviceFingerprint() },

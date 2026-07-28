@@ -42,16 +42,28 @@ check("valid permanent QR resolves the active campaign", async () => {
 });
 check("invalid QR returns the not-found state", async () => {
   const response = await fetch(`${appUrl}/d/staging-test-does-not-exist`, { redirect: "manual" });
-  assert.equal(response.status, 404);
+  const body = await response.text();
+  // This route has loading.tsx, so Next.js streams a 200 response before a
+  // later notFound() can update the status. Assert the user-facing state;
+  // framework metadata inside a streamed React payload is not a stable API.
+  assert.equal(response.status, 200);
+  assert.match(body, /This QR link is not valid|QR not recognized/);
 });
 check("inactive assignment resolves unavailable", async () => {
   try {
-    const { error } = await admin.from("driver_campaign_assignments").update({ status: "removed" }).eq("id", FIXTURE.assignment);
+    const { error } = await admin
+      .from("driver_campaign_assignments")
+      .update({ status: "removed", ended_at: new Date().toISOString() })
+      .eq("id", FIXTURE.assignment);
     if (error) throw error;
     const data = await rpc("get_public_landing_page", { p_public_path: `d/${FIXTURE.qrSlug}`, p_locale: "en" }) as { available?: boolean };
     assert.equal(data?.available, false);
   } finally {
-    await admin.from("driver_campaign_assignments").update({ status: "active" }).eq("id", FIXTURE.assignment);
+    const { error } = await admin
+      .from("driver_campaign_assignments")
+      .update({ status: "active", ended_at: null })
+      .eq("id", FIXTURE.assignment);
+    if (error) throw error;
   }
 });
 check("valid lead submission succeeds", () => assert.match(leadSuccess, /^[0-9a-f-]{36}$/));
@@ -158,7 +170,19 @@ for (const [index, item] of checks.entries()) {
   } catch (error) {
     failed += 1;
     console.error(`not ok ${index + 1} - ${item.name}`);
-    console.error(error instanceof Error ? error.message : "Unknown staging validation failure");
+    console.error(formatError(error));
   }
 }
 if (failed) throw new Error(`${failed} staging validation check(s) failed.`);
+
+function formatError(error: unknown) {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "object" && error !== null && "message" in error) {
+    return String(error.message);
+  }
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return "Unknown staging validation failure";
+  }
+}
