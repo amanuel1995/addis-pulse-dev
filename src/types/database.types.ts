@@ -471,6 +471,7 @@ export type Database = {
           can_edit_profile: boolean;
           can_export_leads: boolean;
           can_manage_notifications: boolean;
+          can_manage_team: boolean;
           can_update_lead_status: boolean;
           can_view_leads: boolean;
           company_id: string;
@@ -486,6 +487,7 @@ export type Database = {
           can_edit_profile?: boolean;
           can_export_leads?: boolean;
           can_manage_notifications?: boolean;
+          can_manage_team?: boolean;
           can_update_lead_status?: boolean;
           can_view_leads?: boolean;
           company_id: string;
@@ -501,6 +503,7 @@ export type Database = {
           can_edit_profile?: boolean;
           can_export_leads?: boolean;
           can_manage_notifications?: boolean;
+          can_manage_team?: boolean;
           can_update_lead_status?: boolean;
           can_view_leads?: boolean;
           company_id?: string;

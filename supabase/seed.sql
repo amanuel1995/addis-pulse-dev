@@ -4,17 +4,21 @@ begin;
 
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
-  raw_app_meta_data, raw_user_meta_data, created_at, updated_at
+  raw_app_meta_data, raw_user_meta_data, confirmation_token, recovery_token,
+  email_change_token_new, email_change, created_at, updated_at
 ) values
   ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated',
    'admin.one@example.test', extensions.crypt('LocalOnly-Fake-Password-1!', extensions.gen_salt('bf')), '2026-01-01 00:00:00+00',
-   '{"provider":"email","providers":["email"]}', '{"full_name":"Fake Platform Admin"}', '2026-01-01 00:00:00+00', '2026-01-01 00:00:00+00'),
+   '{"provider":"email","providers":["email"]}', '{"full_name":"Fake Platform Admin"}', '', '', '', '',
+   '2026-01-01 00:00:00+00', '2026-01-01 00:00:00+00'),
   ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000002', 'authenticated', 'authenticated',
    'rep.alpha@example.test', extensions.crypt('LocalOnly-Fake-Password-2!', extensions.gen_salt('bf')), '2026-01-01 00:00:00+00',
-   '{"provider":"email","providers":["email"]}', '{"full_name":"Fake Alpha Representative"}', '2026-01-01 00:00:00+00', '2026-01-01 00:00:00+00'),
+   '{"provider":"email","providers":["email"]}', '{"full_name":"Fake Alpha Representative"}', '', '', '', '',
+   '2026-01-01 00:00:00+00', '2026-01-01 00:00:00+00'),
   ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000003', 'authenticated', 'authenticated',
    'rep.beta@example.test', extensions.crypt('LocalOnly-Fake-Password-3!', extensions.gen_salt('bf')), '2026-01-01 00:00:00+00',
-   '{"provider":"email","providers":["email"]}', '{"full_name":"Fake Beta Representative"}', '2026-01-01 00:00:00+00', '2026-01-01 00:00:00+00');
+   '{"provider":"email","providers":["email"]}', '{"full_name":"Fake Beta Representative"}', '', '', '', '',
+   '2026-01-01 00:00:00+00', '2026-01-01 00:00:00+00');
 
 update public.profiles
 set platform_role = 'super_admin', full_name = 'Fake Platform Admin'
@@ -38,10 +42,10 @@ insert into public.companies (
 
 insert into public.company_memberships (
   company_id, user_id, can_edit_profile, can_view_leads, can_export_leads,
-  can_update_lead_status, can_manage_notifications, created_by
+  can_update_lead_status, can_manage_notifications, can_manage_team, created_by
 ) values
-  ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000002', true, true, true, true, true, '10000000-0000-0000-0000-000000000001'),
-  ('20000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000003', true, true, true, true, true, '10000000-0000-0000-0000-000000000001');
+  ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000002', true, true, true, true, true, true, '10000000-0000-0000-0000-000000000001'),
+  ('20000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000003', true, true, true, true, true, true, '10000000-0000-0000-0000-000000000001');
 
 insert into public.company_services (id, company_id, name, description, display_order) values
   ('30000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', 'Fake Wellness Consultation', 'Fictitious consultation service.', 1),
@@ -117,6 +121,22 @@ insert into public.qr_codes (id, qr_type, company_id, driver_id, token, public_p
 insert into public.company_receiver_settings (company_id, receiver_name, updated_by) values
   ('20000000-0000-0000-0000-000000000001', 'Fake Alpha Receiver', '10000000-0000-0000-0000-000000000001'),
   ('20000000-0000-0000-0000-000000000002', 'Fake Beta Receiver', '10000000-0000-0000-0000-000000000001');
+
+insert into public.driver_compliance_records (
+  id, driver_id, campaign_id, record_date, checkin_time, inventory_reported,
+  compliance_flag, flag_reason, recorded_by
+) values
+  ('a0000000-0000-0000-0000-000000000001', '60000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000001', '2026-08-03', '2026-08-03 07:05:00+00', 18, false, null, '10000000-0000-0000-0000-000000000001'),
+  ('a0000000-0000-0000-0000-000000000002', '60000000-0000-0000-0000-000000000002', '40000000-0000-0000-0000-000000000001', '2026-08-03', null, 4, true, 'Morning photo check-in missing; inventory requires reconciliation.', '10000000-0000-0000-0000-000000000001'),
+  ('a0000000-0000-0000-0000-000000000003', '60000000-0000-0000-0000-000000000003', '40000000-0000-0000-0000-000000000002', '2026-08-03', '2026-08-03 07:12:00+00', 12, false, null, '10000000-0000-0000-0000-000000000001');
+
+insert into public.inventory_movements (
+  id, driver_id, campaign_id, movement_type, quantity, occurred_at, recorded_by, notes
+) values
+  ('b0000000-0000-0000-0000-000000000001', '60000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000001', 'issued', 25, '2026-08-01 06:00:00+00', '10000000-0000-0000-0000-000000000001', 'Campaign launch stock'),
+  ('b0000000-0000-0000-0000-000000000002', '60000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000001', 'distributed', 7, '2026-08-03 18:00:00+00', '10000000-0000-0000-0000-000000000001', 'Passenger rewards distributed'),
+  ('b0000000-0000-0000-0000-000000000003', '60000000-0000-0000-0000-000000000002', '40000000-0000-0000-0000-000000000001', 'issued', 10, '2026-08-01 06:00:00+00', '10000000-0000-0000-0000-000000000001', 'Campaign launch stock'),
+  ('b0000000-0000-0000-0000-000000000004', '60000000-0000-0000-0000-000000000002', '40000000-0000-0000-0000-000000000001', 'distributed', 6, '2026-08-03 18:00:00+00', '10000000-0000-0000-0000-000000000001', 'Passenger rewards distributed');
 
 insert into public.notification_destinations (
   id, company_id, channel, event_type, frequency, destination_value,
