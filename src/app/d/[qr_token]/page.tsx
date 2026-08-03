@@ -1,14 +1,19 @@
+import { randomUUID } from "node:crypto";
 import { notFound, redirect } from "next/navigation";
 import { CampaignLanding } from "@/components/passenger/CampaignLanding";
 import { createClient } from "@/lib/supabase/server";
-import type { PublicLandingPayload } from "@/types/passenger";
+import {
+  buildPublicCampaignViewModel,
+  classifyPublicLandingResponse,
+  PublicCampaignValidationError,
+  rpcShape,
+} from "@/lib/passenger-flow/public-campaign";
+import type { PublicCampaignViewModel } from "@/types/passenger";
 
 // Driver assignments and campaign availability can change at any time. Avoid
 // serving a cached unavailable result after an assignment is activated (or a
 // cached active campaign after it is removed).
 export const dynamic = "force-dynamic";
-
-type DriverResolution = { driver_name: string };
 
 export default async function DriverQRRoute({
   params,
@@ -18,8 +23,14 @@ export default async function DriverQRRoute({
   searchParams: Promise<{ lang?: string }>;
 }) {
   const [{ qr_token }, query] = await Promise.all([params, searchParams]);
+  const requestId = randomUUID();
   const locale: "en" | "am" = query.lang === "am" ? "am" : "en";
   const publicPath = `d/${qr_token}`;
+  console.info("[public-campaign:start]", {
+    requestId,
+    qrTokenSuffix: qr_token.slice(-6),
+    locale,
+  });
   const supabase = await createClient();
 
   const [resolutionResult, landingResult] = await Promise.all([
@@ -30,52 +41,68 @@ export default async function DriverQRRoute({
     }),
   ]);
 
+  console.info("[public-campaign:rpc-complete]", {
+    requestId,
+    resolution: rpcShape(resolutionResult.data),
+    landing: rpcShape(landingResult.data),
+  });
+
   if (resolutionResult.error) {
-    throw new Error(`Failed to resolve QR token: ${resolutionResult.error.message}`);
+    console.error("[public-campaign:resolution-error]", {
+      requestId,
+      code: resolutionResult.error.code,
+      message: resolutionResult.error.message,
+      details: resolutionResult.error.details,
+      hint: resolutionResult.error.hint,
+    });
+    throw new Error(`Public campaign resolution failed. Reference: ${requestId}`);
   }
   if (landingResult.error) {
-    throw new Error(`Failed to load campaign: ${landingResult.error.message}`);
+    console.error("[public-campaign:landing-error]", {
+      requestId,
+      code: landingResult.error.code,
+      message: landingResult.error.message,
+      details: landingResult.error.details,
+      hint: landingResult.error.hint,
+    });
+    throw new Error(`Public campaign loading failed. Reference: ${requestId}`);
   }
 
-  const landing = landingResult.data as PublicLandingPayload | null;
-  if (!landing || landing.reason === "invalid_qr") notFound();
-  if (!landing.available || !resolutionResult.data) {
+  const landingState = classifyPublicLandingResponse(landingResult.data);
+  console.info("[public-campaign:schema-state]", { requestId, state: landingState.state });
+  if (landingState.state === "not_found") notFound();
+  if (landingState.state === "unavailable" || !resolutionResult.data) {
     redirect(`/d/${encodeURIComponent(qr_token)}/inactive`);
   }
+  if (landingState.state === "invalid") {
+    console.error("[public-campaign:invalid-envelope]", { requestId });
+    throw new Error(`Public campaign response was invalid. Reference: ${requestId}`);
+  }
 
-  const companyAssets = supabase.storage.from("company-assets");
-  const campaignVideos = supabase.storage.from("campaign-videos");
-  const logoUrl = publicAssetUrl(
-    landing.company?.logo_path,
-    (path) => companyAssets.getPublicUrl(path).data.publicUrl,
-  );
-  const videoUrl = publicAssetUrl(
-    landing.video?.path || landing.video?.url,
-    (path) => campaignVideos.getPublicUrl(path).data.publicUrl,
-  );
-  const posterUrl = publicAssetUrl(
-    landing.video?.poster_path,
-    (path) => campaignVideos.getPublicUrl(path).data.publicUrl,
-  );
+  let campaign: PublicCampaignViewModel;
+  try {
+    console.info("[public-campaign:view-model-start]", { requestId });
+    campaign = buildPublicCampaignViewModel({
+      landingData: landingResult.data,
+      driverData: resolutionResult.data,
+      locale,
+      resolveStorageAsset: (bucket, path) =>
+        supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl,
+    });
+  } catch (error) {
+    console.error("[public-campaign:render-failure]", {
+      requestId,
+      name: error instanceof Error ? error.name : "UnknownError",
+      issues: error instanceof PublicCampaignValidationError ? error.issues : undefined,
+    });
+    throw new Error(`Public campaign rendering failed. Reference: ${requestId}`);
+  }
 
-  return (
-    <CampaignLanding
-      landing={landing}
-      qrToken={qr_token}
-      locale={locale}
-      driverName={(resolutionResult.data as DriverResolution).driver_name}
-      logoUrl={logoUrl}
-      videoUrl={videoUrl}
-      posterUrl={posterUrl}
-    />
-  );
-}
-
-function publicAssetUrl(
-  value: string | undefined,
-  resolveStoragePath: (path: string) => string,
-) {
-  if (!value) return null;
-  if (value.startsWith("https://") || value.startsWith("http://")) return value;
-  return resolveStoragePath(value);
+  console.info("[public-campaign:render-ready]", {
+    requestId,
+    hasLogo: Boolean(campaign.advertiser.logoUrl),
+    hasMedia: Boolean(campaign.media.videoUrl),
+    interestCount: campaign.interests.length,
+  });
+  return <CampaignLanding campaign={campaign} qrToken={qr_token} />;
 }

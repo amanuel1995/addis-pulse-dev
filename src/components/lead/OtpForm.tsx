@@ -5,7 +5,13 @@ import { CheckCircle2, LoaderCircle, RotateCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatOtpCountdown, otpErrorMessage, otpSecondsRemaining } from "@/lib/passenger-flow/ui";
 
-export function OtpForm({ expiresAt }: { expiresAt?: string | null }) {
+export function OtpForm({
+  expiresAt,
+  initialSecondsRemaining,
+}: {
+  expiresAt?: string | null;
+  initialSecondsRemaining: number;
+}) {
   const router = useRouter();
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -13,7 +19,8 @@ export function OtpForm({ expiresAt }: { expiresAt?: string | null }) {
   const [pending, setPending] = useState(false);
   const [resending, setResending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
-  const [secondsRemaining, setSecondsRemaining] = useState(() => otpSecondsRemaining(expiresAt));
+  const [wasResent, setWasResent] = useState(false);
+  const [secondsRemaining, setSecondsRemaining] = useState(initialSecondsRemaining);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -58,6 +65,7 @@ export function OtpForm({ expiresAt }: { expiresAt?: string | null }) {
       if (response.ok) {
         setNotice("A new verification code was sent.");
         setCooldown(60);
+        setWasResent(true);
         setCode("");
       } else {
         setError(result.error === "resend_cooldown" ? "Please wait before requesting another code." : "We could not resend the code. Please try again.");
@@ -73,8 +81,8 @@ export function OtpForm({ expiresAt }: { expiresAt?: string | null }) {
     <div className="space-y-5">
       <form onSubmit={verify} className="space-y-5">
         <label className="block text-left text-sm font-bold" htmlFor="otp-code">Six-digit verification code</label>
-        <input id="otp-code" name="code" value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required autoFocus aria-describedby="otp-expiry otp-feedback" className="min-h-16 w-full rounded-2xl border border-[var(--passenger-line)] bg-[#fffdfc] px-4 text-center text-3xl font-extrabold tracking-[0.32em] outline-none transition focus:border-[var(--passenger-primary)] focus:ring-3 focus:ring-[rgba(119,28,15,0.14)]" />
-        <p id="otp-expiry" className="text-sm text-[var(--passenger-muted)]">{secondsRemaining > 0 ? `Code expires in ${formatOtpCountdown(secondsRemaining)}.` : "This code may have expired. You can request a new one."}</p>
+        <input id="otp-code" name="code" value={code} onChange={(event) => { setCode(event.target.value.replace(/\D/g, "").slice(0, 6)); if (error) setError(null); }} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required autoFocus aria-invalid={Boolean(error)} aria-describedby="otp-expiry otp-feedback" className="min-h-16 w-full rounded-2xl border border-[var(--passenger-line)] bg-[#fffdfc] px-4 text-center text-3xl font-extrabold tracking-[0.32em] outline-none transition focus:border-[var(--passenger-primary)] focus:ring-3 focus:ring-[rgba(119,28,15,0.14)] aria-invalid:border-red-600" />
+        <p id="otp-expiry" className="text-sm text-[var(--passenger-muted)]">{wasResent ? "Your new code expires shortly." : secondsRemaining > 0 ? `Code expires in ${formatOtpCountdown(secondsRemaining)}.` : "This code may have expired. You can request a new one."}</p>
         <div id="otp-feedback" aria-live="polite" aria-atomic="true">{error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-800">{error}</p>}{notice && <p className="flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 p-3 text-sm font-semibold text-green-800"><CheckCircle2 aria-hidden="true" className="size-4" />{notice}</p>}</div>
         <button disabled={pending || resending} className="flex min-h-13 w-full items-center justify-center gap-2 rounded-2xl bg-[var(--passenger-primary)] px-5 py-3 font-bold text-white transition-colors hover:bg-[var(--passenger-primary-dark)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--passenger-primary)] disabled:cursor-not-allowed disabled:opacity-60">{pending ? <><LoaderCircle aria-hidden="true" className="size-5 animate-spin motion-reduce:animate-none" />Verifying…</> : "Verify phone"}</button>
       </form>

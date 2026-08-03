@@ -157,6 +157,8 @@ check("landing and reward payload contain expected branding", async () => {
   const response = await fetch(`${appUrl}/d/${FIXTURE.qrSlug}`);
   assert.equal(response.ok, true);
   const body = await response.text();
+  assert.equal(/\$RX\(|NEXT_HTTP_ERROR_FALLBACK|Public campaign rendering failed/.test(body), false, "Rendered response contains a Server Component error marker");
+  assert.doesNotMatch(body, /This campaign is temporarily unavailable/);
   assert.match(body, /\[STAGING TEST\] AddisPulse Campaign/);
   const landing = await rpc("get_public_landing_page", { p_public_path: `d/${FIXTURE.qrSlug}`, p_locale: "en" });
   assert.match(JSON.stringify(landing), /\[STAGING TEST\] Test reward/);

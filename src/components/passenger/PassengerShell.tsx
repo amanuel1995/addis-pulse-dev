@@ -3,6 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { ShieldCheck } from "lucide-react";
 
+const ADDISPULSE_LOGO_PATH = "/logo%20(2).png";
+
 export function PassengerShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-[var(--passenger-background)] text-[var(--passenger-ink)]">
@@ -13,10 +15,32 @@ export function PassengerShell({ children }: { children: ReactNode }) {
 
 export function CampaignFooter() {
   return (
-    <footer className="mx-auto flex w-full max-w-6xl items-center justify-center gap-2 px-5 py-8 text-sm text-[var(--passenger-muted)]">
-      <ShieldCheck aria-hidden="true" className="size-4 text-[var(--passenger-primary)]" />
-      <span>Securely powered by AddisPulse Media</span>
+    <footer className="mx-auto flex w-full max-w-6xl flex-col items-center justify-center gap-2 px-5 py-7 text-center text-sm text-[var(--passenger-muted)] sm:flex-row sm:gap-3">
+      <AddisPulseBrand compact />
+      <span aria-hidden="true" className="hidden h-5 w-px bg-[var(--passenger-line)] sm:block" />
+      <span className="inline-flex items-center gap-1.5">
+        <ShieldCheck aria-hidden="true" className="size-4 text-[var(--passenger-primary)]" />
+        Secure passenger experience
+      </span>
     </footer>
+  );
+}
+
+export function AddisPulseBrand({ compact = false }: { compact?: boolean }) {
+  return (
+    <Link
+      href="/"
+      aria-label="AddisPulse Media home"
+      className="inline-flex min-h-11 items-center rounded-xl px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--passenger-primary)]"
+    >
+      <Image
+        src={ADDISPULSE_LOGO_PATH}
+        alt="AddisPulse Media"
+        width={260}
+        height={100}
+        className={compact ? "h-8 w-auto object-contain" : "h-11 w-auto object-contain"}
+      />
+    </Link>
   );
 }
 

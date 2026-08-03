@@ -2,6 +2,28 @@ export function isValidPassengerPhoneInput(value: string) {
   return /^(?:\+251|251|0)?[79]\d{8}$/.test(value.replace(/[\s()-]/g, ""));
 }
 
+export type PassengerLeadFieldErrors = Partial<
+  Record<"fullName" | "phone" | "email" | "consent", string>
+>;
+
+export function validatePassengerLeadFields(values: {
+  fullName: string;
+  phone: string;
+  email: string;
+  consent: boolean;
+}): PassengerLeadFieldErrors {
+  const errors: PassengerLeadFieldErrors = {};
+  if (values.fullName.trim().length < 2) errors.fullName = "Enter your full name.";
+  if (!isValidPassengerPhoneInput(values.phone)) {
+    errors.phone = "Use an Ethiopian mobile number beginning with 09 or 07.";
+  }
+  if (values.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+    errors.email = "Enter a valid email address or leave this field blank.";
+  }
+  if (!values.consent) errors.consent = "Confirm your consent before continuing.";
+  return errors;
+}
+
 export function leadErrorMessage(code?: string) {
   if (code === "invalid_phone") return "Use a valid Ethiopian mobile number beginning with 09 or 07.";
   if (code === "otp_delivery_failed") return "Your request was saved, but the verification code could not be sent. Please try again shortly.";

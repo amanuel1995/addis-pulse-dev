@@ -41,3 +41,47 @@ export type PublicLandingPayload = {
     caption?: string;
   };
 };
+
+export type PublicCampaignViewModel = {
+  id: string;
+  name: string;
+  locale: "en" | "am";
+  driverName: string;
+  advertiser: {
+    name: string;
+    logoUrl: string | null;
+    description: string | null;
+    servicesSummary: string | null;
+  };
+  content: {
+    headline: string;
+    description: string;
+    offer: string | null;
+    callToAction: string;
+    privacyNotice: string | null;
+    privacyNoticeVersion: string;
+  };
+  branding: {
+    primaryColor: string;
+  };
+  media: {
+    videoUrl: string | null;
+    posterUrl: string | null;
+    caption: string | null;
+    external: boolean;
+  };
+  contact: {
+    phone: string | null;
+    email: string | null;
+    whatsapp: string | null;
+  };
+  reward: {
+    description: string | null;
+  };
+  brochureUrl: string | null;
+  interests: Array<{
+    value: string;
+    label: string;
+    description: string | null;
+  }>;
+};

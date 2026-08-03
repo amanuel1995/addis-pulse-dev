@@ -8,6 +8,7 @@ import {
   otpErrorMessage,
   otpSecondsRemaining,
   shouldShowCampaignMedia,
+  validatePassengerLeadFields,
 } from "../src/lib/passenger-flow/ui.ts";
 
 test("passenger phone feedback accepts Ethiopian local mobile formats", () => {
@@ -15,6 +16,22 @@ test("passenger phone feedback accepts Ethiopian local mobile formats", () => {
   assert.equal(isValidPassengerPhoneInput("0711-234-567"), true);
   assert.equal(isValidPassengerPhoneInput("+251911234567"), true);
   assert.equal(isValidPassengerPhoneInput("0111234567"), false);
+});
+
+test("lead form feedback covers required fields, email, and consent", () => {
+  assert.deepEqual(
+    validatePassengerLeadFields({ fullName: "", phone: "0111234567", email: "bad", consent: false }),
+    {
+      fullName: "Enter your full name.",
+      phone: "Use an Ethiopian mobile number beginning with 09 or 07.",
+      email: "Enter a valid email address or leave this field blank.",
+      consent: "Confirm your consent before continuing.",
+    },
+  );
+  assert.deepEqual(
+    validatePassengerLeadFields({ fullName: "Abebe Kebede", phone: "0911234567", email: "", consent: true }),
+    {},
+  );
 });
 
 test("lead API errors map to safe passenger-facing messages", () => {
