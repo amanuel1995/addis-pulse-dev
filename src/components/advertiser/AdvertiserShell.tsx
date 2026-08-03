@@ -1,12 +1,14 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { BarChart3, LayoutDashboard, ListChecks } from "lucide-react";
+import { BarChart3, Bell, LayoutDashboard, ListChecks, Truck } from "lucide-react";
 import { signOutAdvertiser } from "@/app/advertiser/actions";
 
 const nav = [
   ["Dashboard", "/advertiser/dashboard", LayoutDashboard],
   ["Lead pipeline", "/advertiser/leads", ListChecks],
   ["Campaign value", "/advertiser/campaigns", BarChart3],
+  ["Operations", "/advertiser/operations", Truck],
+  ["Notifications", "/advertiser/settings/notifications", Bell],
 ] as const;
 
 export function AdvertiserShell({ title, companies, children }: { title: string; companies: string[]; children: ReactNode }) {
