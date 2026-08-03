@@ -1,31 +1,25 @@
-import { redirect } from "next/navigation";
 import { RealtimeLeadDashboard } from "@/components/advertiser/RealtimeLeadDashboard";
+import { AdvertiserShell } from "@/components/advertiser/AdvertiserShell";
 import { maskAdvertiserPhone, type DashboardLead } from "@/lib/advertiser-dashboard/leads";
-import { createClient } from "@/lib/supabase/server";
+import { requireAdvertiserContext } from "@/lib/advertiser/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdvertiserDashboardPage() {
-  const supabase = await createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) redirect("/advertiser/login");
-
-  const { data: memberships, error: membershipError } = await supabase
-    .from("company_memberships")
-    .select("company_id,realtime_enabled,companies(name)")
-    .eq("user_id", user.id)
-    .eq("active", true)
-    .eq("can_view_leads", true);
-  if (membershipError) throw new Error(`Unable to load advertiser access: ${membershipError.message}`);
+  const { supabase, user, memberships: allMemberships } = await requireAdvertiserContext();
+  const memberships = allMemberships.filter((membership) => membership.can_view_leads);
+  const shellCompanies = memberships.map((membership) => membership.companies?.name || "Company");
 
   if (!memberships?.length) {
     return (
-      <DashboardFrame>
+      <AdvertiserShell title="Pilot lead dashboard" companies={shellCompanies}>
         <section className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-6">
           <h2 className="text-xl font-bold text-amber-950">Dashboard access unavailable</h2>
-          <p className="mt-2 text-sm leading-6 text-amber-900">Your authenticated account does not have an active company membership with permission to view leads. Contact an AddisPulse administrator.</p>
+          <p className="mt-2 text-sm leading-6 text-amber-900">
+            You are signed in as <strong>{user.email || "an account without advertiser access"}</strong>. Sign out, then use the advertiser representative account supplied by AddisPulse.
+          </p>
         </section>
-      </DashboardFrame>
+      </AdvertiserShell>
     );
   }
 
@@ -57,35 +51,14 @@ export default async function AdvertiserDashboardPage() {
     rewardStatus: rewardStatuses[lead.id] || null,
   }));
 
-  const companyNames = memberships
-    .map((membership) => {
-      const company = membership.companies as { name?: string } | null;
-      return company?.name;
-    })
-    .filter(Boolean)
-    .join(", ");
-
   return (
-    <DashboardFrame companyNames={companyNames}>
+    <AdvertiserShell title="Pilot lead dashboard" companies={shellCompanies}>
       <RealtimeLeadDashboard
         initialLeads={leads}
         campaignNames={campaignNames}
         companyIds={companyIds}
         realtimeEnabled={memberships.some((membership) => membership.realtime_enabled)}
       />
-    </DashboardFrame>
-  );
-}
-
-function DashboardFrame({ children, companyNames }: { children: React.ReactNode; companyNames?: string }) {
-  return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-red-800">AddisPulse Media</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Pilot lead dashboard</h1>
-        <p className="mt-2 text-slate-600">{companyNames || "Advertiser access"}</p>
-        {children}
-      </div>
-    </main>
+    </AdvertiserShell>
   );
 }
