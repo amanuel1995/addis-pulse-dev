@@ -5,15 +5,61 @@ import {
   BadgeCheck,
   BarChart3,
   BellRing,
+  BriefcaseBusiness,
   Building2,
+  CarFront,
   Check,
   CircleCheck,
+  ExternalLink,
+  LockKeyhole,
   MapPin,
   MessageCircleMore,
   QrCode,
+  ScanLine,
+  Settings2,
   ShieldCheck,
+  Smartphone,
   Sparkles,
 } from "lucide-react";
+
+const portals = [
+  {
+    eyebrow: "For passengers",
+    title: "Open a campaign",
+    description: "Scan the QR inside your vehicle to open the active offer, verify your phone, and claim the advertiser reward.",
+    action: "How passenger access works",
+    href: "#passenger-access",
+    icon: Smartphone,
+    tone: "light",
+  },
+  {
+    eyebrow: "For client teams",
+    title: "Advertiser portal",
+    description: "Review verified leads, campaign performance, notifications, company settings, and team permissions.",
+    action: "Sign in as advertiser",
+    href: "/advertiser/login",
+    icon: BriefcaseBusiness,
+    tone: "red",
+  },
+  {
+    eyebrow: "For field teams",
+    title: "Driver operations",
+    description: "Manage driver check-ins, compliance photos, inventory movements, leaderboards, and bonus approvals.",
+    action: "Open secure operations",
+    href: "/admin/login",
+    icon: CarFront,
+    tone: "green",
+  },
+  {
+    eyebrow: "For AddisPulse",
+    title: "Admin console",
+    description: "Operate companies, campaigns, assignments, lead review, billing, QR codes, rewards, and platform controls.",
+    action: "Sign in as admin",
+    href: "/admin/login",
+    icon: Settings2,
+    tone: "dark",
+  },
+] as const;
 
 const operatingLoop = [
   {
@@ -65,7 +111,7 @@ export default function Home() {
             />
           </Link>
           <nav aria-label="Primary navigation" className="hidden items-center gap-8 text-sm font-bold text-[#465048] md:flex">
-            <a href="#platform" className="transition-colors hover:text-[#8d2114]">Platform</a>
+            <a href="#portals" className="transition-colors hover:text-[#8d2114]">Portals</a>
             <a href="#journey" className="transition-colors hover:text-[#8d2114]">How it works</a>
             <a href="#impact" className="transition-colors hover:text-[#8d2114]">Campaign value</a>
           </nav>
@@ -159,6 +205,67 @@ export default function Home() {
                   <div><p className="text-2xl font-black">Live</p><p className="text-xs text-white/45">delivery</p></div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="portals" className="border-b border-[#17201b]/10 bg-[#fffdf8] py-20 sm:py-28">
+        <div className="mx-auto max-w-[1400px] px-5 sm:px-8 lg:px-12">
+          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#8d2114]">One platform, four experiences</p>
+              <h2 className="mt-5 max-w-2xl text-4xl font-black leading-[0.95] tracking-[-0.055em] sm:text-6xl">Start in the workspace built for your role.</h2>
+            </div>
+            <div className="flex items-start gap-3 rounded-2xl border border-[#17201b]/10 bg-[#f4f0e8] p-5 lg:ml-auto lg:max-w-xl">
+              <LockKeyhole className="mt-0.5 size-5 shrink-0 text-[#8d2114]" aria-hidden="true" />
+              <p className="text-sm leading-6 text-[#566058]">Advertiser, field, and admin workspaces are protected. Your account only reveals the company data and tools you are authorized to use.</p>
+            </div>
+          </div>
+
+          <div className="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {portals.map((portal) => {
+              const Icon = portal.icon;
+              const tones = {
+                light: "border-[#17201b]/10 bg-[#f4f0e8] text-[#17201b]",
+                red: "border-[#8d2114] bg-[#8d2114] text-white",
+                green: "border-[#24483a] bg-[#24483a] text-white",
+                dark: "border-[#17201b] bg-[#17201b] text-white",
+              } as const;
+
+              return (
+                <Link key={portal.title} href={portal.href} className={`group flex min-h-[340px] flex-col rounded-[28px] border p-6 transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_55px_rgba(23,32,27,0.13)] sm:p-7 ${tones[portal.tone]}`}>
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="grid size-12 place-items-center rounded-2xl border border-current/15 bg-white/10"><Icon className="size-5" strokeWidth={1.8} aria-hidden="true" /></span>
+                    <ExternalLink className="size-4 opacity-45 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100" aria-hidden="true" />
+                  </div>
+                  <p className="mt-10 text-xs font-black uppercase tracking-[0.17em] opacity-55">{portal.eyebrow}</p>
+                  <h3 className="mt-3 text-2xl font-black tracking-[-0.035em]">{portal.title}</h3>
+                  <p className="mt-4 text-sm leading-6 opacity-70">{portal.description}</p>
+                  <span className="mt-auto flex items-center gap-2 pt-8 text-sm font-black">{portal.action} <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden="true" /></span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section id="passenger-access" className="border-b border-[#17201b]/10 bg-[#f4f0e8] py-16 sm:py-20">
+        <div className="mx-auto grid max-w-[1400px] gap-8 px-5 sm:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:px-12">
+          <div className="flex items-center gap-5">
+            <span className="grid size-16 shrink-0 place-items-center rounded-full bg-[#8d2114] text-white"><ScanLine className="size-7" aria-hidden="true" /></span>
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-[#8d2114]">Passenger access</p>
+              <h2 className="mt-2 text-3xl font-black tracking-[-0.04em] sm:text-4xl">Your vehicle QR is your link.</h2>
+            </div>
+          </div>
+          <div className="rounded-[24px] border border-[#17201b]/10 bg-white/70 p-6 sm:p-7">
+            <p className="text-lg font-extrabold text-[#17201b]">No passenger account or app download is required.</p>
+            <p className="mt-3 leading-7 text-[#5f6861]">Open your phone camera and scan the AddisPulse card inside the vehicle. The permanent driver QR automatically loads the campaign currently assigned to that ride.</p>
+            <div className="mt-5 flex flex-wrap gap-2 text-xs font-bold text-[#566058]">
+              {["Scan", "Choose an offer", "Verify by OTP", "Receive the reward"].map((item, index) => (
+                <span key={item} className="rounded-full border border-[#17201b]/10 bg-[#fffdf8] px-3 py-2">{index + 1}. {item}</span>
+              ))}
             </div>
           </div>
         </div>
