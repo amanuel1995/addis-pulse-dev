@@ -188,12 +188,19 @@ export async function createDriver(formData: FormData) {
   if (!parsed.success) finish("/admin/drivers", "error", "Check the driver fields.");
   const phone = normalizeEthiopianPhone(parsed.data.phone);
   if (!phone) finish("/admin/drivers", "error", "Use a valid Ethiopian mobile number.");
-  const { error } = await createAdminClient().from("drivers").insert({
-    full_name: parsed.data.fullName, phone_e164: phone, phone_hash: hashPhone(phone),
-    vehicle_plate: parsed.data.vehiclePlate.toUpperCase(), vehicle_type: parsed.data.vehicleType,
-    primary_zone: parsed.data.primaryZone, telegram_handle: parsed.data.telegramHandle || null,
-    status: "registered",
-  });
+  let error: { code?: string; message: string } | null = null;
+  try {
+    const phoneHash = hashPhone(phone);
+    ({ error } = await createAdminClient().from("drivers").insert({
+      full_name: parsed.data.fullName, phone_e164: phone, phone_hash: phoneHash,
+      vehicle_plate: parsed.data.vehiclePlate.toUpperCase(), vehicle_type: parsed.data.vehicleType,
+      primary_zone: parsed.data.primaryZone, telegram_handle: parsed.data.telegramHandle || null,
+      status: "registered",
+    }));
+  } catch (cause) {
+    console.error("[admin:create-driver:exception]", cause);
+    finish("/admin/drivers", "error", "Driver registration is temporarily unavailable. Check the server configuration.");
+  }
   if (error) {
     console.error("[admin:create-driver]", { code: error.code, message: error.message });
     finish("/admin/drivers", "error", error.code === "23505" ? "That phone or vehicle plate is already registered." : "Unable to create the driver.");
