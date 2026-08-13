@@ -39,6 +39,18 @@ const campaignSchema = z.object({
   privacyNotice: z.string().trim().min(10),
 });
 
+const campaignUpdateSchema = z.object({
+  id: databaseUuid,
+  name: z.string().trim().min(2).max(160),
+  campaignType: z.enum(["lead_generation", "product_launch", "appointment_booking", "brand_awareness"]),
+  startDate: z.iso.date(),
+  endDate: z.iso.date(),
+  vehicleCount: z.coerce.number().int().min(1).max(10000),
+  targetLeads: z.number().int().min(0).optional(),
+  budgetEtb: z.number().min(0).optional(),
+  rewardDescription: z.string().trim().max(500),
+});
+
 const driverSchema = z.object({
   fullName: z.string().trim().min(2).max(100),
   phone: z.string().trim(),
@@ -177,6 +189,32 @@ export async function updateCampaignStatus(formData: FormData) {
   if (error) finish("/admin/campaigns", "error", "Unable to update the campaign status.");
   refreshAdmin();
   finish("/admin/campaigns", "message", "Campaign status updated.");
+}
+
+export async function updateCampaign(formData: FormData) {
+  await requirePlatformAdmin();
+  const parsed = campaignUpdateSchema.safeParse({
+    id: value(formData, "id"), name: value(formData, "name"), campaignType: value(formData, "campaignType"),
+    startDate: value(formData, "startDate"), endDate: value(formData, "endDate"),
+    vehicleCount: Number(value(formData, "vehicleCount")), targetLeads: optionalNumber(formData, "targetLeads"),
+    budgetEtb: optionalNumber(formData, "budgetEtb"), rewardDescription: value(formData, "rewardDescription"),
+  });
+  if (!parsed.success || parsed.data.endDate < parsed.data.startDate) {
+    finish("/admin/campaigns", "error", "Check the campaign fields and dates.");
+  }
+
+  const { error } = await createAdminClient().from("campaigns").update({
+    name: parsed.data.name, campaign_type: parsed.data.campaignType,
+    start_date: parsed.data.startDate, end_date: parsed.data.endDate,
+    vehicle_count: parsed.data.vehicleCount, target_leads: parsed.data.targetLeads ?? null,
+    budget_etb: parsed.data.budgetEtb ?? null, reward_description: parsed.data.rewardDescription || null,
+  }).eq("id", parsed.data.id);
+  if (error) {
+    console.error("[admin:update-campaign]", { code: error.code, message: error.message });
+    finish("/admin/campaigns", "error", "Unable to update the campaign.");
+  }
+  refreshAdmin();
+  finish("/admin/campaigns", "message", `${parsed.data.name} was updated.`);
 }
 
 export async function createDriver(formData: FormData) {
