@@ -15,17 +15,23 @@ export function AdminLoginForm() {
     setError(null);
     const form = new FormData(event.currentTarget);
     const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: String(form.get("email") || "").trim(),
-      password: String(form.get("password") || ""),
-    });
-    if (signInError) {
-      setError("Sign-in failed. Check the admin credentials and try again.");
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: String(form.get("email") || "").trim(),
+        password: String(form.get("password") || ""),
+      });
+      if (signInError) {
+        setError("Sign-in failed. Check the admin credentials and try again.");
+        return;
+      }
+      router.replace("/admin");
+      router.refresh();
+    } catch (cause) {
+      console.error("[admin:sign-in:network]", cause);
+      setError("Cannot reach the authentication service. Check your Supabase connection and try again.");
+    } finally {
       setPending(false);
-      return;
     }
-    router.replace("/admin");
-    router.refresh();
   }
 
   return (
