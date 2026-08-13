@@ -1,141 +1,29 @@
 "use client";
 
 import { FormEvent, useRef, useState } from "react";
+import { ArrowRight, LoaderCircle, LockKeyhole } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ETHIOPIAN_PHONE_INPUT_PATTERN } from "@/lib/passenger-flow/phone";
+import { isValidPassengerPhoneInput, type PassengerLeadFieldErrors, validatePassengerLeadFields } from "@/lib/passenger-flow/ui";
+import { passengerDictionary, type PassengerLocale } from "@/lib/passenger-flow/i18n";
 
-export function LeadForm({
-  qrToken,
-  brandColor,
-  callToAction = "Continue",
-  privacyNotice,
-}: {
-  qrToken: string;
-  brandColor: string;
-  callToAction?: string;
-  privacyNotice?: string;
-}) {
-  const router = useRouter();
-  const idempotencyKey = useRef(crypto.randomUUID());
-  const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
-
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    setError(null);
-    const form = new FormData(event.currentTarget);
-
-    try {
-      const response = await fetch("/api/v1/leads", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "x-device-fingerprint": getDeviceFingerprint(),
-        },
-        body: JSON.stringify({
-          qrToken,
-          idempotencyKey: idempotencyKey.current,
-          fullName: form.get("fullName"),
-          phone: form.get("phone"),
-          email: form.get("email"),
-          interestedService: form.get("interestedService"),
-          consentGiven: form.get("consent") === "on",
-          privacyNoticeVersion: "2026-07-v1",
-        }),
-      });
-      const result = (await response.json()) as {
-        error?: string;
-        nextRoute?: string;
-      };
-
-      if (response.ok && result.nextRoute) {
-        router.push(result.nextRoute);
-        return;
-      }
-      setError(errorMessage(result.error));
-    } catch {
-      setError("We could not connect. Check your connection and try again.");
-    } finally {
-      setPending(false);
-    }
-  }
-
-  return (
-    <form onSubmit={submit} className="space-y-4">
-      <Field label="Full name / ሙሉ ስም" name="fullName" autoComplete="name" required />
-      <Field
-        label="Phone number / ስልክ ቁጥር"
-        name="phone"
-        type="tel"
-        inputMode="tel"
-        placeholder="0911 234 567"
-        pattern={ETHIOPIAN_PHONE_INPUT_PATTERN}
-        title="Use an Ethiopian mobile number such as 0911 234 567 or +251911234567"
-        autoComplete="tel"
-        required
-      />
-      <Field
-        label="Email (optional) / ኢሜይል"
-        name="email"
-        type="email"
-        autoComplete="email"
-      />
-      <Field label="Interest (optional) / ፍላጎት" name="interestedService" />
-      <label className="flex items-start gap-3 text-sm text-gray-600">
-        <input name="consent" type="checkbox" required className="mt-1 size-4" />
-        <span>
-          {privacyNotice ||
-            "I agree to be contacted about this offer. / ስለዚህ ቅናሽ እንዲገናኙኝ ተስማምቻለሁ።"}
-        </span>
-      </label>
-      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-      <button
-        type="submit"
-        disabled={pending}
-        className="w-full rounded-lg px-4 py-3 font-semibold text-white disabled:opacity-60"
-        style={{ backgroundColor: brandColor }}
-      >
-        {pending ? "Sending code…" : `${callToAction} / ይቀጥሉ`}
-      </button>
-    </form>
-  );
+export function LeadForm({ qrToken, callToAction, privacyNotice, privacyNoticeVersion, services, companyName, locale }: { qrToken:string; callToAction:string; privacyNotice?:string; privacyNoticeVersion:string; services:string[]; companyName:string; locale:PassengerLocale }) {
+  const router=useRouter(), t=passengerDictionary(locale), idempotencyKey=useRef<string|null>(null);
+  const [values,setValues]=useState({fullName:"",phone:"",email:"",interestedService:""}); const [consent,setConsent]=useState(false); const [fieldErrors,setFieldErrors]=useState<PassengerLeadFieldErrors>({}); const [error,setError]=useState<string|null>(null); const [pending,setPending]=useState(false);
+  const inputClass="mt-2 min-h-12 w-full rounded-xl border border-[var(--passenger-line)] bg-[#fffdfc] px-4 text-base text-[var(--passenger-ink)] outline-none transition focus:border-[var(--passenger-primary)] focus:ring-3 focus:ring-[rgba(119,28,15,0.14)] aria-invalid:border-red-600";
+  function update(name:keyof typeof values,value:string){setValues(c=>({...c,[name]:value}));setFieldErrors(c=>({...c,[name]:undefined}));}
+  function validatePhone(){const valid=isValidPassengerPhoneInput(values.phone);setFieldErrors(c=>({...c,phone:valid?undefined:t.errors.phone}));return valid;}
+  async function submit(event:FormEvent<HTMLFormElement>){event.preventDefault();const raw=validatePassengerLeadFields({...values,consent});const localized:PassengerLeadFieldErrors={};if(raw.fullName)localized.fullName=t.errors.name;if(raw.phone)localized.phone=t.errors.phone;if(raw.email)localized.email=t.errors.email;if(raw.consent)localized.consent=t.errors.consent;setFieldErrors(localized);if(Object.keys(localized).length)return;setPending(true);setError(null);try{idempotencyKey.current??=crypto.randomUUID();const response=await fetch("/api/v1/leads",{method:"POST",headers:{"content-type":"application/json","x-device-fingerprint":getDeviceFingerprint()},body:JSON.stringify({qrToken,idempotencyKey:idempotencyKey.current,...values,consentGiven:consent,privacyNoticeVersion})});const result=await response.json() as {error?:string;nextRoute?:string};if(response.ok&&result.nextRoute){router.push(`${result.nextRoute}?lang=${locale}`);return;}setError(result.error==="otp_delivery_failed"?t.errors.otpDelivery:result.error==="invalid_phone"?t.errors.phone:t.errors.generic);}catch{setError(t.errors.connection);}finally{setPending(false);}}
+  return <form onSubmit={submit} className="space-y-5" noValidate>
+    <Field label={t.fullName} error={fieldErrors.fullName}><input name="fullName" value={values.fullName} onChange={e=>update("fullName",e.target.value)} autoComplete="name" placeholder={t.fullNamePlaceholder} required className={inputClass}/></Field>
+    <Field label={t.phone} error={fieldErrors.phone}><input name="phone" value={values.phone} onChange={e=>update("phone",e.target.value)} onBlur={validatePhone} type="tel" dir="ltr" inputMode="tel" autoComplete="tel" placeholder="09... / 07..." pattern={ETHIOPIAN_PHONE_INPUT_PATTERN} required className={inputClass}/><span className="mt-2 block text-sm font-normal text-[var(--passenger-muted)]">{t.phoneHelp}</span></Field>
+    <Field label={`${t.email} (${t.optional})`} error={fieldErrors.email}><input name="email" value={values.email} onChange={e=>update("email",e.target.value)} type="email" dir="ltr" autoComplete="email" placeholder="you@example.com" className={inputClass}/></Field>
+    {services.length?<Field label={`${t.service} (${t.optional})`}><select name="interestedService" value={values.interestedService} onChange={e=>update("interestedService",e.target.value)} className={inputClass}><option value="">{t.chooseService}</option>{services.map(s=><option key={s}>{s}</option>)}</select></Field>:<Field label={`${t.interest} (${t.optional})`}><input name="interestedService" value={values.interestedService} onChange={e=>update("interestedService",e.target.value)} placeholder={t.interestPlaceholder} className={inputClass}/></Field>}
+    <div><label className="flex cursor-pointer items-start gap-3 rounded-xl bg-[var(--passenger-primary-soft)] p-4 text-sm leading-6 text-[var(--passenger-muted)]"><input name="consent" type="checkbox" checked={consent} onChange={e=>{setConsent(e.target.checked);setFieldErrors(c=>({...c,consent:undefined}));}} required className="mt-1 size-5 shrink-0 accent-[var(--passenger-primary)]"/><span>{privacyNotice||t.consent(companyName)}</span></label>{fieldErrors.consent&&<p role="alert" className="mt-2 text-sm font-semibold text-red-700">{fieldErrors.consent}</p>}</div>
+    {error&&<p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-800">{error}</p>}
+    <button disabled={pending} className="flex min-h-13 w-full items-center justify-center gap-2 rounded-2xl bg-[var(--passenger-primary)] px-5 py-3 font-bold text-white disabled:opacity-60">{pending?<><LoaderCircle className="size-5 animate-spin"/>{t.sending}</>:<>{callToAction}<ArrowRight className="size-5 rtl:rotate-180"/></>}</button>
+    <p className="flex items-center justify-center gap-2 text-sm text-[var(--passenger-muted)]"><LockKeyhole className="size-4"/>{t.secure}</p>
+  </form>;
 }
-
-type FieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
-  label: string;
-  name: string;
-};
-
-function Field({ label, name, ...props }: FieldProps) {
-  return (
-    <label className="block text-sm font-medium text-gray-700">
-      {label}
-      <input
-        {...props}
-        name={name}
-        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-base outline-none focus:border-gray-600"
-      />
-    </label>
-  );
-}
-
-function getDeviceFingerprint() {
-  const raw = `${navigator.userAgent}|${navigator.language}|${screen.width}x${screen.height}`;
-  let hash = 0;
-  for (let index = 0; index < raw.length; index += 1) {
-    hash = (hash * 31 + raw.charCodeAt(index)) | 0;
-  }
-  return `browser-${Math.abs(hash)}`;
-}
-
-function errorMessage(code?: string) {
-  if (code === "invalid_phone") return "Enter a valid Ethiopian mobile number.";
-  if (code === "otp_delivery_failed") {
-    return "Your details were saved, but the verification code could not be sent. Please try again.";
-  }
-  if (code === "invalid_or_inactive_qr" || code === "campaign_unavailable") {
-    return "This campaign is unavailable.";
-  }
-  return "We could not submit your details. Please try again.";
-}
+function Field({label,error,children}:{label:string;error?:string;children:React.ReactNode}){return <label className="block text-sm font-bold">{label}{children}{error&&<span role="alert" className="mt-2 block text-sm font-semibold text-red-700">{error}</span>}</label>}
+function getDeviceFingerprint(){const raw=`${navigator.userAgent}|${navigator.language}|${screen.width}x${screen.height}`;let hash=0;for(let i=0;i<raw.length;i++)hash=(hash*31+raw.charCodeAt(i))|0;return `browser-${Math.abs(hash)}`;}

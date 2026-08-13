@@ -7,6 +7,9 @@
     "build": "next build",
     "start": "next start",
     "test": "node --experimental-test-isolation=none --test --experimental-strip-types tests/*.test.mts",
+    "test:staging": "node --experimental-strip-types scripts/staging/validate.mts",
+    "staging:fixtures:up": "node --experimental-strip-types scripts/staging/bootstrap-fixtures.mts",
+    "staging:fixtures:down": "node --experimental-strip-types scripts/staging/cleanup-fixtures.mts",
     "lint": "eslint",
     "typecheck": "tsc --noEmit"
   },

@@ -24,6 +24,8 @@
 # misc
 .DS_Store
 Thumbs.db
+desktop.ini
+public/addispulse_qr_landing_mockup (1).html
 .idea/
 .vscode/
 *.pem

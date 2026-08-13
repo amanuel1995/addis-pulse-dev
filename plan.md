@@ -1,6 +1,6 @@
 # AddisPulse Media - Implementation Plan
 
-*Last updated: 2026-07-21 | Maintained by: Antigravity (Bluecore engagement)*
+*Last updated: 2026-07-24 | Maintained by: Bluecore engineering*
 
 > Source of truth for branch creation, sprint planning, and progress tracking.
 > Cross-referenced with `docs/internal/architecture.md`, `docs/internal/addis_pulse_full_analysis.md`, and `docs/internal/schema_architecture_gap_analysis.md`.
@@ -22,6 +22,9 @@ Milestones are large logical groupings. A single milestone can and should be spl
 - [x] Public landing page shell, bilingual, ISR (`feature/nextjs-proxy-migration`)
 - [x] v4 schema direction selected; architecture compatibility RPC added (`resolve_driver_campaign` backed by `qr_codes`)
 - [x] Lead form + OTP flow (Africa's Talking) + thank-you + inactive screens (`feature/lead-otp-passenger-flow`)
+- [x] Production OTP, API, security, database regression, and guarded staging validation (`feature/lead-otp-production`)
+- [x] Passenger presentation redesign (`feature/passenger-ui-redesign`)
+- [x] Release-candidate reconciliation and minimum company-scoped realtime advertiser lead visibility (`feature/m1-release-candidate`)
 
 ### Milestone 2: Campaign & Driver Management (The Engine)
 
@@ -58,9 +61,11 @@ Branch: `feature/client-driver-portals`
 
 ---
 
-## Current Sprint - Milestone 1: `feature/lead-capture-otp`
+## Current Sprint - Milestone 1 Release Candidate: `feature/m1-release-candidate`
 
 > Goal: A passenger who scans a QR code can submit their name and phone, receive an OTP SMS via Africa's Talking, verify it, and land on a thank-you screen. No lead is counted as `otp_verified` without phone confirmation.
+
+The foundational v4 migration is merged. It is immutable; all later database changes must be incremental migrations. The release candidate is intended for Vercel Preview connected to staging Supabase. It also includes a deliberately narrow `/advertiser/dashboard` for authenticated company representatives with `can_view_leads`, using RLS-protected Realtime inserts and updates. Full advertiser portal work remains Milestone 4.
 
 ### UI Components
 
@@ -134,7 +139,10 @@ Branch: `feature/client-driver-portals`
 - [x] Full flow implemented end to end: scan -> form -> OTP SMS -> verify -> `otp_verified` in DB
 - [x] Invalid, expired, and exhausted OTP states show user-facing errors
 - [x] Inactive or invalid driver token routes to the correct unavailable/not-found state
-- [ ] Draft PR opened against `main`
+- [ ] Complete visual/manual local browser smoke test
+- [ ] Complete one controlled staging Africa's Talking SMS check
+- [ ] Verify Vercel Preview uses staging Supabase variables
+- [ ] Draft PR from `feature/m1-release-candidate` opened against `main`
 
 ---
 
@@ -149,3 +157,4 @@ Branch: `feature/client-driver-portals`
 | 2026-07-09 | Supabase retained, not Neon | Realtime, Auth, and Storage are hard requirements; Neon does not cover the whole platform need. |
 | 2026-07-09 | Milestone restructuring | Shifted from 10-week chronological plan to 4 logical feature milestones. |
 | 2026-07-10 | v4 schema direction selected | Use the enterprise v4 schema as the target direction; keep `qr_codes` model and add `resolve_driver_campaign()` compatibility for architecture/app alignment. |
+| 2026-07-24 | Milestone 1 release-candidate integration | Preserve production OTP/security work, reconcile the stronger passenger UI, and add only minimum protected advertiser Realtime visibility. |
