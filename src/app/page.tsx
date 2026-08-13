@@ -47,16 +47,16 @@ export default function Home() {
         <div aria-hidden="true" className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_82%_18%,#e8ded0_0,transparent_26%),radial-gradient(circle_at_14%_78%,#f1c7bc_0,transparent_24%)]" />
         <div className="mx-auto grid min-h-[760px] max-w-[1440px] lg:grid-cols-[1.05fr_.95fr]">
           <div className="flex flex-col justify-center px-5 py-20 sm:px-8 lg:px-12 lg:py-28">
-            <div className="home-reveal flex w-fit items-center gap-2 rounded-full border border-[#17201b]/10 bg-white/80 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] shadow-sm">
+            <div className="flex w-fit items-center gap-2 rounded-full border border-[#17201b]/10 bg-white/70 px-4 py-2 text-xs font-black uppercase tracking-[0.16em]">
               <MapPin className="size-4 text-[#8d2114]" aria-hidden="true" /> Addis Ababa, in motion
             </div>
-            <h1 className="home-reveal home-delay-1 mt-7 max-w-4xl text-[clamp(3.5rem,7.4vw,7.2rem)] font-black leading-[0.84] tracking-[-0.075em]">
-              Attention that <span className="relative whitespace-nowrap text-[#8d2114]">moves<span aria-hidden="true" className="home-line absolute -bottom-1 left-0 h-2 w-full origin-left rounded-full bg-[#e0a232]/45" /></span> business.
+            <h1 className="mt-7 max-w-4xl text-[clamp(3.5rem,7.4vw,7.2rem)] font-black leading-[0.84] tracking-[-0.075em]">
+              Attention that moves business.
             </h1>
-            <p className="home-reveal home-delay-2 mt-8 max-w-2xl text-lg leading-8 text-[#566058] sm:text-xl">
+            <p className="mt-8 max-w-2xl text-lg leading-8 text-[#566058] sm:text-xl">
               AddisPulse turns everyday rides into measurable brand experiences—connecting passenger attention to verified customer demand.
             </p>
-            <div className="home-reveal home-delay-3 mt-9 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <a href="#campaign-inquiry" className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-[#8d2114] px-7 py-3.5 font-extrabold text-white shadow-[0_18px_45px_rgba(141,33,20,.2)] transition hover:-translate-y-0.5 hover:bg-[#68170d]">
                 Launch a campaign <ArrowRight className="size-5" aria-hidden="true" />
               </a>
@@ -66,9 +66,9 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="home-reveal home-delay-2 relative m-4 min-h-[620px] overflow-hidden rounded-[36px] bg-[#17201b] p-6 text-white shadow-[0_30px_90px_rgba(23,32,27,.22)] sm:m-8 sm:p-10 lg:my-10 lg:ml-0 lg:mr-10 lg:p-12">
-            <div aria-hidden="true" className="home-orbit absolute -right-20 -top-20 size-72 rounded-full bg-[#8d2114] blur-[2px]" />
-            <div aria-hidden="true" className="home-float absolute -bottom-24 -left-20 size-80 rounded-full bg-[#df785f]" />
+          <div className="relative m-4 min-h-[620px] overflow-hidden rounded-[36px] bg-[#17201b] p-6 text-white sm:m-8 sm:p-10 lg:my-10 lg:ml-0 lg:mr-10 lg:p-12">
+            <div aria-hidden="true" className="absolute -right-20 -top-20 size-72 rounded-full bg-[#8d2114] blur-[2px]" />
+            <div aria-hidden="true" className="absolute -bottom-24 -left-20 size-80 rounded-full bg-[#df785f]" />
             <div className="relative flex h-full min-h-[530px] flex-col justify-between">
               <div className="flex items-center justify-between gap-4">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-white/55">Live campaign signal</p>
@@ -80,7 +80,7 @@ export default function Home() {
                   <div className="mt-8 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full w-[72%] rounded-full bg-[#df785f]" /></div>
                   <div className="mt-6 grid grid-cols-3 gap-2 text-center"><Metric value="450" label="Scans" /><Metric value="120" label="Verified" /><Metric value="26.7%" label="Rate" /></div>
                 </div>
-                <div className="home-float mt-4 ml-auto flex w-[88%] items-center gap-3 rounded-2xl bg-white p-4 text-[#17201b] shadow-2xl">
+                <div className="mt-4 ml-auto flex w-[88%] items-center gap-3 rounded-2xl bg-white p-4 text-[#17201b] shadow-2xl">
                   <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#f7edeb]"><MessageCircleMore className="size-5 text-[#8d2114]" /></span>
                   <div><p className="text-xs font-bold text-[#6b5f5c]">New verified lead</p><p className="font-black">Ready for client follow-up</p></div>
                 </div>

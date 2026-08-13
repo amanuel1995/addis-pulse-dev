@@ -24,6 +24,12 @@ const companySchema = z.object({
   description: z.string().trim().max(500),
 });
 
+const companyProfileSchema = z.object({
+  id: databaseUuid, description: z.string().trim().max(500), servicesSummary: z.string().trim().max(1000),
+  contactEmail: z.email().or(z.literal("")), contactPhone: z.string().trim(),
+  whatsappUrl: z.string().trim().max(2048), websiteUrl: z.string().trim().max(2048),
+});
+
 const campaignSchema = z.object({
   companyId: databaseUuid,
   name: z.string().trim().min(2).max(160),
@@ -142,6 +148,17 @@ export async function updateCompanyStatus(formData: FormData) {
   if (error) finish("/admin/companies", "error", "Unable to update the company status.");
   refreshAdmin();
   finish("/admin/companies", "message", "Company status updated.");
+}
+
+export async function updateCompanyProfile(formData: FormData) {
+  await requirePlatformAdmin();
+  const parsed = companyProfileSchema.safeParse({ id:value(formData,"id"), description:value(formData,"description"), servicesSummary:value(formData,"servicesSummary"), contactEmail:value(formData,"contactEmail"), contactPhone:value(formData,"contactPhone"), whatsappUrl:value(formData,"whatsappUrl"), websiteUrl:value(formData,"websiteUrl") });
+  if (!parsed.success) finish("/admin/companies", "error", "Check the company profile fields.");
+  const phone = parsed.data.contactPhone ? normalizeEthiopianPhone(parsed.data.contactPhone) : null;
+  if (parsed.data.contactPhone && !phone) finish("/admin/companies", "error", "Use a valid Ethiopian mobile number.");
+  for (const url of [parsed.data.whatsappUrl, parsed.data.websiteUrl]) if (url && !z.url().safeParse(url).success) finish("/admin/companies", "error", "Use complete https:// links for website and WhatsApp.");
+  const {error}=await createAdminClient().from("companies").update({description:parsed.data.description||null,services_summary:parsed.data.servicesSummary||null,public_contact_email:parsed.data.contactEmail||null,public_contact_phone:phone,whatsapp_url:parsed.data.whatsappUrl||null,website_url:parsed.data.websiteUrl||null}).eq("id",parsed.data.id);
+  if(error) finish("/admin/companies","error","Unable to update the company profile."); refreshAdmin(); finish("/admin/companies","message","Company profile updated.");
 }
 
 export async function updateCompanyLogo(formData: FormData) {
