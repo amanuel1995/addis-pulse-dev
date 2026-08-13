@@ -22,7 +22,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "lucide-react": "^1.24.0",
-    "next": "16.2.12",
+    "next": "16.3.0",
     "node-telegram-bot-api": "^1.1.2",
     "qrcode": "^1.5.4",
     "react": "19.2.7",
@@ -44,15 +44,13 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9.39.4",
-    "eslint-config-next": "16.2.12",
+    "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
     "typescript": "^5.9.3"
   },
   "overrides": {
     "axios": "1.18.1",
-    "brace-expansion": "2.0.2",
     "joi": "18.2.3",
-    "postcss": ">=8.5.18",
-    "sharp": "0.35.0"
+    "postcss": ">=8.5.10"
   }
 }
