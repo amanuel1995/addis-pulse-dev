@@ -1,3 +1,5 @@
+import type { PassengerLocale } from "@/lib/passenger-flow/i18n";
+
 export type CampaignContent = {
   locale?: string;
   content_version?: number;
@@ -45,7 +47,7 @@ export type PublicLandingPayload = {
 export type PublicCampaignViewModel = {
   id: string;
   name: string;
-  locale: "en" | "am";
+  locale: PassengerLocale;
   driverName: string;
   advertiser: {
     name: string;
@@ -68,6 +70,7 @@ export type PublicCampaignViewModel = {
     videoUrl: string | null;
     posterUrl: string | null;
     caption: string | null;
+    provider: string | null;
     external: boolean;
   };
   contact: {

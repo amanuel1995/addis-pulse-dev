@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Bell, Building2, CalendarRange, CarFront, CircleDollarSign, FileSliders, Gauge, Gift, Link2, ScanLine, ShieldCheck, Truck, Video } from "lucide-react";
+import { Bell, Building2, CalendarRange, CarFront, CircleDollarSign, FileSliders, Gauge, Gift, Link2, ScanLine, ShieldCheck, Smartphone, Truck, Video } from "lucide-react";
 import { signOutAdmin } from "@/app/admin/actions";
 
 const navigation = [
@@ -15,6 +15,7 @@ const navigation = [
   ["Billing", "/admin/billing", CircleDollarSign],
   ["Content", "/admin/content", FileSliders],
   ["Media", "/admin/media", Video],
+  ["Flow preview", "/admin/passenger-preview", Smartphone],
   ["QR", "/admin/qr-codes", ScanLine],
   ["Rewards", "/admin/rewards", Gift],
   ["System", "/admin/system", Gauge],

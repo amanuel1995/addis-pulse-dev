@@ -57,3 +57,28 @@ export function formatOtpCountdown(seconds: number) {
 export function shouldShowCampaignMedia(videoUrl?: string | null) {
   return Boolean(videoUrl);
 }
+
+export function campaignVideoEmbedUrl(provider: string | null | undefined, videoUrl: string) {
+  try {
+    const url = new URL(videoUrl);
+    if (provider === "youtube") {
+      const host = url.hostname.toLowerCase().replace(/^www\./, "");
+      const youtubeHosts = ["youtube.com", "m.youtube.com"];
+      if (host !== "youtu.be" && !youtubeHosts.includes(host)) return null;
+      let id = host === "youtu.be" ? url.pathname.slice(1).split("/")[0] : url.searchParams.get("v");
+      if (!id && youtubeHosts.includes(host)) {
+        const match = url.pathname.match(/^\/(?:embed|shorts)\/([\w-]{6,})/);
+        id = match?.[1] || null;
+      }
+      return id && /^[\w-]{6,}$/.test(id) ? `https://www.youtube-nocookie.com/embed/${id}?rel=0` : null;
+    }
+    if (provider === "vimeo") {
+      const host = url.hostname.toLowerCase().replace(/^www\./, "");
+      const id = host === "vimeo.com" || host === "player.vimeo.com" ? url.pathname.match(/(?:video\/)?(\d+)/)?.[1] : null;
+      return id ? `https://player.vimeo.com/video/${id}` : null;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}

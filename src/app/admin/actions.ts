@@ -144,6 +144,61 @@ export async function updateCompanyStatus(formData: FormData) {
   finish("/admin/companies", "message", "Company status updated.");
 }
 
+export async function updateCompanyLogo(formData: FormData) {
+  await requirePlatformAdmin();
+  const id = databaseUuid.safeParse(value(formData, "id"));
+  const logo = formData.get("logo");
+  if (!id.success || !(logo instanceof File) || !logo.size) {
+    finish("/admin/companies", "error", "Choose a company logo to upload.");
+  }
+  const allowedTypes: Record<string, string> = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+  };
+  const extension = allowedTypes[logo.type];
+  if (!extension || logo.size > 2_000_000) {
+    finish("/admin/companies", "error", "Use a PNG, JPEG, or WebP logo under 2 MB.");
+  }
+
+  const admin = createAdminClient();
+  const { data: company, error: companyError } = await admin.from("companies").select("id,identifier").eq("id", id.data).maybeSingle();
+  if (companyError || !company) finish("/admin/companies", "error", "Company not found.");
+  const { data: bucket, error: bucketLookupError } = await admin.storage.getBucket("company-assets");
+  if (bucketLookupError && !/not found/i.test(bucketLookupError.message)) {
+    console.error("[admin:company-logo-bucket]", { message: bucketLookupError.message });
+    finish("/admin/companies", "error", "Unable to access company logo storage.");
+  }
+  if (!bucket) {
+    const { error: bucketCreateError } = await admin.storage.createBucket("company-assets", {
+      public: true,
+      fileSizeLimit: 2_000_000,
+      allowedMimeTypes: Object.keys(allowedTypes),
+    });
+    if (bucketCreateError) {
+      console.error("[admin:company-logo-bucket-create]", { message: bucketCreateError.message });
+      finish("/admin/companies", "error", "Unable to initialize company logo storage.");
+    }
+  }
+  const logoPath = `companies/${company.identifier}/logo-${randomBytes(6).toString("hex")}.${extension}`;
+  const { error: uploadError } = await admin.storage.from("company-assets").upload(logoPath, logo, {
+    contentType: logo.type,
+    cacheControl: "31536000",
+    upsert: false,
+  });
+  if (uploadError) {
+    console.error("[admin:company-logo-upload]", { message: uploadError.message });
+    finish("/admin/companies", "error", "Unable to upload the company logo. Check the company-assets storage bucket.");
+  }
+  const { error: updateError } = await admin.from("companies").update({ logo_path: logoPath }).eq("id", company.id);
+  if (updateError) {
+    console.error("[admin:company-logo-update]", { code: updateError.code, message: updateError.message });
+    finish("/admin/companies", "error", "The logo uploaded, but the company record could not be updated.");
+  }
+  refreshAdmin();
+  finish("/admin/companies", "message", `${company.identifier} logo updated.`);
+}
+
 export async function createCampaign(formData: FormData) {
   const actor = await requirePlatformAdmin();
   const parsed = campaignSchema.safeParse({

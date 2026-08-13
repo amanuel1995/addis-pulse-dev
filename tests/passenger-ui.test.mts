@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  campaignVideoEmbedUrl,
   formatOtpCountdown,
   isValidPassengerPhoneInput,
   leadErrorMessage,
@@ -10,6 +11,7 @@ import {
   shouldShowCampaignMedia,
   validatePassengerLeadFields,
 } from "../src/lib/passenger-flow/ui.ts";
+import { passengerDictionary, passengerLocale } from "../src/lib/passenger-flow/i18n.ts";
 
 test("passenger phone feedback accepts Ethiopian local mobile formats", () => {
   assert.equal(isValidPassengerPhoneInput("0911 234 567"), true);
@@ -57,4 +59,29 @@ test("campaign media fallback is selected when media is absent", () => {
   assert.equal(shouldShowCampaignMedia(undefined), false);
   assert.equal(shouldShowCampaignMedia(null), false);
   assert.equal(shouldShowCampaignMedia("https://example.test/video.mp4"), true);
+});
+
+test("campaign video links convert to safe provider embeds", () => {
+  assert.equal(
+    campaignVideoEmbedUrl("youtube", "https://youtu.be/dQw4w9WgXcQ"),
+    "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+  );
+  assert.equal(
+    campaignVideoEmbedUrl("youtube", "https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
+    "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",
+  );
+  assert.equal(
+    campaignVideoEmbedUrl("vimeo", "https://vimeo.com/76979871"),
+    "https://player.vimeo.com/video/76979871",
+  );
+  assert.equal(campaignVideoEmbedUrl("youtube", "https://example.com/watch?v=dQw4w9WgXcQ"), null);
+});
+
+test("passenger locales default to English and provide four dictionaries", () => {
+  assert.equal(passengerLocale(undefined), "en");
+  assert.equal(passengerLocale("unknown"), "en");
+  assert.equal(passengerLocale("am"), "am");
+  assert.match(passengerDictionary("am").welcomeTitle, /ተሳፋሪ/);
+  assert.match(passengerDictionary("om").welcomeTitle, /imaltuu/i);
+  assert.match(passengerDictionary("ar").welcomeTitle, /الراكب/);
 });

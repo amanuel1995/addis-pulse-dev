@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { PublicCampaignViewModel } from "../../types/passenger";
+import type { PassengerLocale } from "./i18n";
 
 const optionalString = z.unknown().optional().transform((value) =>
   typeof value === "string" && value.trim() ? value.trim() : null,
@@ -119,7 +120,7 @@ export function buildPublicCampaignViewModel({
 }: {
   landingData: unknown;
   driverData: unknown;
-  locale: "en" | "am";
+  locale: PassengerLocale;
   resolveStorageAsset: (bucket: "company-assets" | "campaign-videos", path: string) => string;
 }): PublicCampaignViewModel {
   const landingResult = publicCampaignSchema.safeParse(normalizeRpcRecord(landingData));
@@ -173,6 +174,7 @@ export function buildPublicCampaignViewModel({
       ),
       posterUrl: safeAssetUrl(landing.video?.poster_path, "campaign-videos", resolveStorageAsset),
       caption: landing.video?.caption || null,
+      provider: provider || null,
       external: provider !== "supabase_storage",
     },
     contact: {

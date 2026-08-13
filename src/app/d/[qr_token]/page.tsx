@@ -9,6 +9,7 @@ import {
   rpcShape,
 } from "@/lib/passenger-flow/public-campaign";
 import type { PublicCampaignViewModel } from "@/types/passenger";
+import { passengerLocale } from "@/lib/passenger-flow/i18n";
 
 // Driver assignments and campaign availability can change at any time. Avoid
 // serving a cached unavailable result after an assignment is activated (or a
@@ -24,7 +25,7 @@ export default async function DriverQRRoute({
 }) {
   const [{ qr_token }, query] = await Promise.all([params, searchParams]);
   const requestId = randomUUID();
-  const locale: "en" | "am" = query.lang === "am" ? "am" : "en";
+  const locale = passengerLocale(query.lang);
   const publicPath = `d/${qr_token}`;
   console.info("[public-campaign:start]", {
     requestId,
