@@ -76,10 +76,26 @@ export async function handleDeletionRequest(fd: FormData) { const actor=await re
 export async function retryNotification(fd: FormData) { await requirePlatformAdmin(); const id=uuid.safeParse(text(fd,"id")); if(!id.success) done("/admin/notifications","error","Invalid job."); const {error}=await createAdminClient().from("notification_jobs").update({status:"retry",next_attempt_at:new Date().toISOString(),locked_at:null,locked_by:null,last_error:null}).eq("id",id.data).in("status",["dead_letter","cancelled","retry"]); if(error) done("/admin/notifications","error",error.message); done("/admin/notifications","message","Notification queued for retry."); }
 
 export async function addCampaignVideo(fd: FormData) {
-  const actor = await requirePlatformAdmin(); const campaignId = uuid.safeParse(text(fd,"campaignId")); const provider = z.enum(["youtube","vimeo","cloudinary"]).safeParse(text(fd,"provider")); const duration = z.coerce.number().int().min(30).max(50).safeParse(text(fd,"duration"));
-  if(!campaignId.success||!provider.success||!duration.success||!z.url().safeParse(text(fd,"url")).success) done("/admin/media","error","Use a valid video URL and duration from 30 to 50 seconds.");
-  const admin=createAdminClient(); const activate=text(fd,"active")==="on"; if(activate) await admin.from("campaign_videos").update({active:false}).eq("campaign_id",campaignId.data).eq("active",true);
-  const{error}=await admin.from("campaign_videos").insert({campaign_id:campaignId.data,provider:provider.data,video_url:text(fd,"url"),duration_seconds:duration.data,caption:text(fd,"caption")||null,active:activate,validated_at:new Date().toISOString(),validated_by:actor.id,created_by:actor.id}); if(error) done("/admin/media","error",error.message); done("/admin/media","message","Campaign video saved and validated.");
+  const actor = await requirePlatformAdmin();
+  const campaignId = uuid.safeParse(text(fd,"campaignId"));
+  const provider = z.enum(["youtube","vimeo","cloudinary","supabase_storage"]).safeParse(text(fd,"provider"));
+  const duration = z.coerce.number().int().min(30).max(50).safeParse(text(fd,"duration"));
+  if(!campaignId.success||!provider.success||!duration.success) done("/admin/media","error","Select a campaign and use a duration from 30 to 50 seconds.");
+  const admin=createAdminClient(); let videoUrl:string|null=null; let videoPath:string|null=null;
+  if(provider.data==="supabase_storage") {
+    const video=fd.get("video"); const allowedTypes:Record<string,string>={"video/mp4":"mp4","video/webm":"webm"};
+    if(!(video instanceof File)||!video.size) done("/admin/media","error","Choose an MP4 or WebM video to upload.");
+    const extension=allowedTypes[video.type]; if(!extension||video.size>100_000_000) done("/admin/media","error","Use an MP4 or WebM video under 100 MB.");
+    const {data:bucket,error:bucketError}=await admin.storage.getBucket("campaign-videos");
+    if(bucketError&&!/not found/i.test(bucketError.message)) done("/admin/media","error",`Unable to access video storage: ${bucketError.message}`);
+    if(!bucket) { const {error:createError}=await admin.storage.createBucket("campaign-videos",{public:true,fileSizeLimit:100_000_000,allowedMimeTypes:Object.keys(allowedTypes)}); if(createError) done("/admin/media","error",`Unable to initialize video storage: ${createError.message}`); }
+    videoPath=`campaigns/${campaignId.data}/${Date.now()}-${randomBytes(6).toString("hex")}.${extension}`;
+    const {error:uploadError}=await admin.storage.from("campaign-videos").upload(videoPath,video,{contentType:video.type,cacheControl:"31536000",upsert:false});
+    if(uploadError) done("/admin/media","error",`Video upload failed: ${uploadError.message}`);
+  } else { const parsedUrl=z.url().safeParse(text(fd,"url")); if(!parsedUrl.success) done("/admin/media","error","Enter a valid hosted video URL."); videoUrl=parsedUrl.data; }
+  const activate=text(fd,"active")==="on"; if(activate) await admin.from("campaign_videos").update({active:false}).eq("campaign_id",campaignId.data).eq("active",true);
+  const{error}=await admin.from("campaign_videos").insert({campaign_id:campaignId.data,provider:provider.data,video_url:videoUrl,video_path:videoPath,duration_seconds:duration.data,caption:text(fd,"caption")||null,active:activate,validated_at:new Date().toISOString(),validated_by:actor.id,created_by:actor.id});
+  if(error) done("/admin/media","error",error.message); done("/admin/media","message","Campaign video uploaded, validated, and saved.");
 }
 
 export async function updateReward(fd: FormData) {

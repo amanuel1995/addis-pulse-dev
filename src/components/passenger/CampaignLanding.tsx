@@ -9,7 +9,7 @@ import { passengerDictionary } from "@/lib/passenger-flow/i18n";
 export function CampaignLanding({campaign,qrToken}:{campaign:PublicCampaignViewModel;qrToken:string}) {
   const company=campaign.advertiser,t=passengerDictionary(campaign.locale);
   const contacts=[campaign.contact.phone&&{href:`tel:${campaign.contact.phone}`,label:t.call,icon:Phone},campaign.contact.email&&{href:`mailto:${campaign.contact.email}`,label:t.emailAction,icon:Mail},campaign.contact.whatsapp&&{href:campaign.contact.whatsapp,label:t.whatsapp,icon:MessageCircle}].filter(Boolean) as Array<{href:string;label:string;icon:typeof Phone}>;
-  return <PassengerShell><div lang={campaign.locale} dir={campaign.locale==="ar"?"rtl":"ltr"} style={{"--passenger-primary":campaign.branding.primaryColor} as React.CSSProperties}>
+  return <PassengerShell><div lang={campaign.locale} dir={campaign.locale==="ar"?"rtl":"ltr"} style={{"--passenger-primary":"#8d2114"} as React.CSSProperties}>
     <CampaignVisitTracker qrToken={qrToken}/>
     <header className="sticky top-0 z-30 border-b border-[var(--passenger-line)] bg-white/95 backdrop-blur-xl"><div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-6"><div className="flex min-w-0 items-center gap-3"><BrandMark name={company.name} logoUrl={company.logoUrl}/><div className="min-w-0"><p className="truncate font-extrabold">{company.name}</p><p className="truncate text-xs text-[var(--passenger-muted)]">{t.presented}</p></div></div><LanguageSwitcher qrToken={qrToken} locale={campaign.locale}/></div></header>
     <main className="mx-auto w-full max-w-5xl px-4 pb-10 pt-4 sm:px-6 sm:pt-6">
