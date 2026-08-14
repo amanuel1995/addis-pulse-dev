@@ -12,6 +12,10 @@ const completeSchema = z.object({
   action: z.literal("complete"), campaignId: uuid, path: z.string().min(1).max(1024),
   duration: z.number().int().min(30).max(50), caption: z.string().trim().max(240), active: z.boolean(),
 });
+const externalSchema = z.object({
+  action: z.literal("external"), campaignId: uuid, provider: z.enum(["youtube", "vimeo", "cloudinary"]),
+  url: z.url(), duration: z.number().int().min(30).max(50), caption: z.string().trim().max(240), active: z.boolean(),
+});
 
 export async function POST(request: Request) {
   const actor = await requirePlatformAdmin();
@@ -24,6 +28,16 @@ export async function POST(request: Request) {
     const { data, error } = await admin.storage.from("campaign-videos").createSignedUploadUrl(path);
     if (error || !data) return Response.json({ error: error?.message || "Unable to prepare upload." }, { status: 500 });
     return Response.json({ path: data.path, token: data.token });
+  }
+  const external = externalSchema.safeParse(body);
+  if (external.success) {
+    const url = new URL(external.data.url); const host = url.hostname.toLowerCase();
+    const validHost = external.data.provider === "youtube" ? ["youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be"].includes(host) : external.data.provider === "vimeo" ? ["vimeo.com", "www.vimeo.com", "player.vimeo.com"].includes(host) : host === "res.cloudinary.com";
+    if (url.protocol !== "https:" || !validHost) return Response.json({ error: `Enter a valid ${external.data.provider} URL.` }, { status: 400 });
+    if (external.data.active) await admin.from("campaign_videos").update({ active: false }).eq("campaign_id", external.data.campaignId).eq("active", true);
+    const { error } = await admin.from("campaign_videos").insert({ campaign_id: external.data.campaignId, provider: external.data.provider, video_url: url.toString(), video_path: null, duration_seconds: external.data.duration, caption: external.data.caption || null, active: external.data.active, validated_at: new Date().toISOString(), validated_by: actor.id, created_by: actor.id });
+    if (error) return Response.json({ error: error.message }, { status: 500 });
+    return Response.json({ ok: true });
   }
   const complete = completeSchema.safeParse(body);
   if (!complete.success) return Response.json({ error: "Invalid video details." }, { status: 400 });
