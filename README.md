@@ -1,6 +1,6 @@
-# AddisPulse Media
+# RidePerk Media
 
-AddisPulse Media is a QR-enabled mobility advertising platform for Addis Ababa. Milestone 1 connects a permanent driver QR to an active campaign, captures a consented passenger lead, verifies the phone through OTP, presents the reward state, and shows company-scoped lead activity in a protected advertiser dashboard.
+RidePerk Media is a QR-enabled mobility advertising platform for Addis Ababa. Milestone 1 connects a permanent driver QR to an active campaign, captures a consented passenger lead, verifies the phone through OTP, presents the reward state, and shows company-scoped lead activity in a protected advertiser dashboard.
 
 ## Release-candidate scope
 

@@ -54,7 +54,7 @@ class AfricaTalkingOtpProvider implements OtpProvider {
     const response = await sms.send({
       to: [phoneE164],
       senderId: process.env.AT_SENDER_ID || undefined,
-      message: `Your AddisPulse verification code is ${code}. It expires shortly.`,
+      message: `Your RidePerk verification code is ${code}. It expires shortly.`,
     });
     const recipient = response.SMSMessageData?.Recipients?.[0];
     if (!recipient || recipient.status?.toLowerCase() !== "success") {

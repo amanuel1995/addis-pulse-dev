@@ -15,7 +15,7 @@ export default async function NotificationSettingsPage({ searchParams }: { searc
   if (error) throw new Error(`Unable to load notification settings: ${error.message}`);
   const names = Object.fromEntries(memberships.map((m) => [m.company_id, m.companies?.name || "Company"]));
   return <AdvertiserShell title="Notification settings" companies={Object.values(names)}>
-    <p className="mt-3 max-w-3xl text-slate-600">Send verified leads directly to your sales team. Add the AddisPulse bot to the Telegram group first, then enter its public handle or numeric chat ID.</p>
+    <p className="mt-3 max-w-3xl text-slate-600">Send verified leads directly to your sales team. Add the RidePerk bot to the Telegram group first, then enter its public handle or numeric chat ID.</p>
     {query.message && <p className="mt-5 rounded-xl bg-emerald-50 p-3 font-semibold text-emerald-900">{query.message}</p>}
     {query.error && <p className="mt-5 rounded-xl bg-red-50 p-3 font-semibold text-red-900">{query.error}</p>}
     <div className="mt-8 grid gap-6 xl:grid-cols-3">

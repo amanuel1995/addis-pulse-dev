@@ -29,8 +29,8 @@ export default function Home() {
     <main className="min-h-screen overflow-hidden bg-[#f4f0e8] text-[#17201b]">
       <header className="sticky top-0 z-40 border-b border-[#17201b]/10 bg-[#f4f0e8]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-5 px-5 py-4 sm:px-8 lg:px-12">
-          <Link href="/" aria-label="AddisPulse Media home">
-            <Image src="/logo%20(2).png" alt="AddisPulse Media" width={260} height={100} priority className="h-11 w-auto object-contain" />
+          <Link href="/" aria-label="RidePerk home">
+            <Image src="/logo_forrp.webp" alt="RidePerk" width={260} height={100} priority className="h-11 w-auto object-contain" />
           </Link>
           <nav aria-label="Primary navigation" className="hidden items-center gap-7 text-sm font-bold md:flex">
             <a href="#how-it-works" className="hover:text-[#8d2114]">How it works</a>
@@ -54,7 +54,7 @@ export default function Home() {
               Attention that moves business.
             </h1>
             <p className="mt-8 max-w-2xl text-lg leading-8 text-[#566058] sm:text-xl">
-              AddisPulse turns everyday rides into measurable brand experiences—connecting passenger attention to verified customer demand.
+              RidePerk turns everyday rides into measurable brand experiences—connecting passenger attention to verified customer demand.
             </p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <a href="#campaign-inquiry" className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-[#8d2114] px-7 py-3.5 font-extrabold text-white shadow-[0_18px_45px_rgba(141,33,20,.2)] transition hover:-translate-y-0.5 hover:bg-[#68170d]">
@@ -118,7 +118,7 @@ export default function Home() {
       </section>
 
       <footer className="bg-[#17201b] py-10 text-white">
-        <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-5 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12"><p className="font-black">AddisPulse Media</p><div className="flex flex-wrap gap-5 text-sm text-white/55"><span>Passengers scan in vehicle</span><Link href="/portal" className="hover:text-white">Portal access</Link><span>Consent-first · OTP-verified</span></div></div>
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-5 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12"><p className="font-black">RidePerk</p><div className="flex flex-wrap gap-5 text-sm text-white/55"><span>Passengers scan in vehicle</span><Link href="/portal" className="hover:text-white">Portal access</Link><span>Consent-first · OTP-verified</span></div></div>
       </footer>
     </main>
   );

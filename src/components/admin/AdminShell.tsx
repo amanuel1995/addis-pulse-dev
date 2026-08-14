@@ -26,7 +26,7 @@ export function AdminShell({ title, eyebrow, adminName, children }: { title: str
     <main className="min-h-screen bg-slate-100 text-slate-950">
       <header className="border-b border-slate-200 bg-slate-950 text-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
-          <div><Link href="/admin" className="text-xl font-black tracking-tight">AddisPulse Operations</Link><p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-red-300">Campaign control center</p></div>
+          <div><Link href="/admin" className="text-xl font-black tracking-tight">RidePerk Operations</Link><p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-red-300">Campaign control center</p></div>
           <nav aria-label="Admin navigation" className="flex flex-wrap gap-2">
             {navigation.map(([label, href, Icon]) => <Link key={href} href={href} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 text-sm font-bold transition hover:bg-white hover:text-slate-950"><Icon className="size-4" aria-hidden="true" />{label}</Link>)}
           </nav>

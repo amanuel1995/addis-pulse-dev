@@ -66,7 +66,7 @@ export async function sendTelegramTest(formData: FormData) {
   const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ chat_id: destination.destination_value, text: `✅ AddisPulse connection confirmed for ${destination.label || "your sales team"}. Verified leads can now be delivered here.` }),
+    body: JSON.stringify({ chat_id: destination.destination_value, text: `✅ RidePerk connection confirmed for ${destination.label || "your sales team"}. Verified leads can now be delivered here.` }),
     cache: "no-store",
   });
   if (!response.ok) {

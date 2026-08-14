@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 export function CampaignVisitTracker({ qrToken }: { qrToken: string }) {
   useEffect(() => {
-    const key = `addispulse-visit:${qrToken}`;
+    const key = `rideperk-visit:${qrToken}`;
     const existing = sessionStorage.getItem(key);
     if (existing) return;
     const sessionId = crypto.randomUUID();

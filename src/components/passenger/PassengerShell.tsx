@@ -4,7 +4,7 @@ import Image from "next/image";
 import { ShieldCheck } from "lucide-react";
 import { passengerDictionary, passengerLocales, type PassengerLocale } from "@/lib/passenger-flow/i18n";
 
-const ADDISPULSE_LOGO_PATH = "/logo%20(2).png";
+const RIDEPERK_LOGO_PATH = "/logo_forrp.webp";
 
 export function PassengerShell({ children }: { children: ReactNode }) {
   return <div className="min-h-screen bg-[var(--passenger-background)] text-[var(--passenger-ink)]">{children}</div>;
@@ -12,11 +12,11 @@ export function PassengerShell({ children }: { children: ReactNode }) {
 
 export function CampaignFooter({ locale = "en" }: { locale?: PassengerLocale }) {
   const t = passengerDictionary(locale);
-  return <footer className="mx-auto flex w-full max-w-6xl flex-col items-center justify-center gap-2 px-5 py-7 text-center text-sm text-[var(--passenger-muted)] sm:flex-row sm:gap-3"><AddisPulseBrand compact /><span aria-hidden="true" className="hidden h-5 w-px bg-[var(--passenger-line)] sm:block" /><span className="inline-flex items-center gap-1.5"><ShieldCheck aria-hidden="true" className="size-4 text-[var(--passenger-primary)]" />{t.secureExperience}</span></footer>;
+  return <footer className="mx-auto flex w-full max-w-6xl flex-col items-center justify-center gap-2 px-5 py-7 text-center text-sm text-[var(--passenger-muted)] sm:flex-row sm:gap-3"><RidePerkBrand compact /><span aria-hidden="true" className="hidden h-5 w-px bg-[var(--passenger-line)] sm:block" /><span className="inline-flex items-center gap-1.5"><ShieldCheck aria-hidden="true" className="size-4 text-[var(--passenger-primary)]" />{t.secureExperience}</span></footer>;
 }
 
-export function AddisPulseBrand({ compact = false }: { compact?: boolean }) {
-  return <Link href="/" aria-label="AddisPulse Media home" className="inline-flex min-h-11 items-center rounded-xl px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--passenger-primary)]"><Image src={ADDISPULSE_LOGO_PATH} alt="AddisPulse Media" width={260} height={100} className={compact ? "h-8 w-auto object-contain" : "h-11 w-auto object-contain"} /></Link>;
+export function RidePerkBrand({ compact = false }: { compact?: boolean }) {
+  return <Link href="/" aria-label="RidePerk home" className="inline-flex min-h-11 items-center rounded-xl px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--passenger-primary)]"><Image src={RIDEPERK_LOGO_PATH} alt="RidePerk" width={260} height={100} className={compact ? "h-8 w-auto object-contain" : "h-11 w-auto object-contain"} /></Link>;
 }
 
 export function LanguageSwitcher({ qrToken, locale }: { qrToken: string; locale: PassengerLocale }) {
@@ -25,5 +25,5 @@ export function LanguageSwitcher({ qrToken, locale }: { qrToken: string; locale:
 }
 
 export function BrandMark({ name, logoUrl }: { name: string; logoUrl?: string | null }) {
-  return logoUrl ? <Image src={logoUrl} alt={`${name} logo`} width={48} height={48} unoptimized className="size-12 rounded-2xl border border-[var(--passenger-line)] bg-white object-contain p-1.5" /> : <div aria-hidden="true" className="grid size-12 place-items-center rounded-2xl bg-[var(--passenger-primary)] text-lg font-black text-white shadow-[0_10px_28px_rgba(119,28,15,0.2)]">{name.trim().slice(0, 2).toUpperCase() || "AP"}</div>;
+  return logoUrl ? <Image src={logoUrl} alt={`${name} logo`} width={48} height={48} unoptimized className="size-12 rounded-2xl border border-[var(--passenger-line)] bg-white object-contain p-1.5" /> : <div aria-hidden="true" className="grid size-12 place-items-center rounded-2xl bg-[var(--passenger-primary)] text-lg font-black text-white shadow-[0_10px_28px_rgba(119,28,15,0.2)]">{name.trim().slice(0, 2).toUpperCase() || "RP"}</div>;
 }

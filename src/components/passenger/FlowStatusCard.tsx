@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { AddisPulseBrand, CampaignFooter, PassengerShell } from "./PassengerShell";
+import { RidePerkBrand, CampaignFooter, PassengerShell } from "./PassengerShell";
 
 export function FlowStatusCard({
   icon,
@@ -19,7 +19,7 @@ export function FlowStatusCard({
       <main className="mx-auto flex min-h-[calc(100vh-72px)] w-full max-w-lg items-center px-4 py-10 sm:px-6">
         <section className="w-full rounded-[28px] border border-[var(--passenger-line)] bg-white p-6 text-center shadow-[0_24px_70px_rgba(82,36,24,0.1)] sm:p-9">
           <div className="mb-5 flex justify-center border-b border-[var(--passenger-line)] pb-4">
-            <AddisPulseBrand />
+            <RidePerkBrand />
           </div>
           <div className="mx-auto mb-5 grid size-16 place-items-center rounded-2xl bg-[var(--passenger-primary-soft)] text-[var(--passenger-primary)]">
             {icon}

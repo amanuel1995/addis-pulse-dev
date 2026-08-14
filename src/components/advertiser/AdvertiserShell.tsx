@@ -19,7 +19,7 @@ export function AdvertiserShell({ title, companies, children }: { title: string;
     <main className="min-h-screen bg-slate-100 text-slate-950">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
-          <div><Link href="/advertiser/dashboard" className="text-xl font-black tracking-tight">AddisPulse Client Portal</Link><p className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-red-800">{companies.join(" · ") || "Advertiser access"}</p></div>
+          <div><Link href="/advertiser/dashboard" className="text-xl font-black tracking-tight">RidePerk Client Portal</Link><p className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-red-800">{companies.join(" · ") || "Advertiser access"}</p></div>
           <nav aria-label="Advertiser navigation" className="flex flex-wrap gap-2">{nav.map(([label, href, Icon]) => <Link key={href} href={href} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-slate-200 px-4 text-sm font-bold hover:border-slate-950 hover:bg-slate-950 hover:text-white"><Icon className="size-4" aria-hidden="true" />{label}</Link>)}</nav>
           <form action={signOutAdvertiser}><button className="rounded-full border border-slate-300 px-4 py-2 text-sm font-black hover:bg-slate-950 hover:text-white">Sign out</button></form>
         </div>
