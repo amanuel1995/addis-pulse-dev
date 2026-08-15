@@ -27,8 +27,8 @@ export function AdminShell({ title, eyebrow, adminName, children }: { title: str
       <header className="border-b border-slate-200 bg-slate-950 text-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-5 lg:flex-row lg:items-center lg:justify-between">
           <div><Link href="/admin" className="text-xl font-black tracking-tight">RidePerk Operations</Link><p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-red-300">Campaign control center</p></div>
-          <nav aria-label="Admin navigation" className="flex flex-wrap gap-2">
-            {navigation.map(([label, href, Icon]) => <Link key={href} href={href} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 text-sm font-bold transition hover:bg-white hover:text-slate-950"><Icon className="size-4" aria-hidden="true" />{label}</Link>)}
+          <nav aria-label="Admin navigation" className="grid grid-cols-6 gap-2 sm:flex sm:flex-wrap">
+            {navigation.map(([label, href, Icon], index) => <Link key={href} href={href} className={`${index % 5 < 3 ? "col-span-2" : "col-span-3"} inline-flex min-h-12 items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 text-center text-xs font-bold transition hover:bg-white hover:text-slate-950 sm:min-h-10 sm:w-auto sm:px-4 sm:text-sm`}><Icon className="size-4 shrink-0" aria-hidden="true" />{label}</Link>)}
           </nav>
           <div className="flex items-center gap-3 text-sm text-white/60"><div><span className="font-bold text-white">{adminName}</span><br />Platform admin</div><form action={signOutAdmin}><button className="rounded-full border border-white/15 px-3 py-2 text-xs font-black text-white hover:bg-white hover:text-slate-950">Sign out</button></form></div>
         </div>

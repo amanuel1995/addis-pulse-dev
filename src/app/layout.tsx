@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   },
   description: "QR-powered campaigns and passenger rewards in Addis Ababa.",
   applicationName: "RidePerk",
-  icons: { icon: "/favicon.ico", apple: "/icon.png" },
+  icons: { icon: { url: "/favicon.svg", type: "image/svg+xml" }, apple: "/icon.png" },
   openGraph: { title: "RidePerk", description: "QR-powered campaigns and passenger rewards in Addis Ababa.", siteName: "RidePerk", type: "website" },
   twitter: { card: "summary_large_image", title: "RidePerk", description: "QR-powered campaigns and passenger rewards in Addis Ababa." },
 };
