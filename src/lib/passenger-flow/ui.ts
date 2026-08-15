@@ -1,3 +1,5 @@
+import { isValidPassengerEmailInput } from "./email.ts";
+
 export function isValidPassengerPhoneInput(value: string) {
   return /^(?:\+251|251|0)?[79]\d{8}$/.test(value.replace(/[\s()-]/g, ""));
 }
@@ -17,7 +19,7 @@ export function validatePassengerLeadFields(values: {
   if (!isValidPassengerPhoneInput(values.phone)) {
     errors.phone = "Use an Ethiopian mobile number beginning with 09 or 07.";
   }
-  if (values.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+  if (!isValidPassengerEmailInput(values.email)) {
     errors.email = "Enter a valid email address or leave this field blank.";
   }
   if (!values.consent) errors.consent = "Confirm your consent before continuing.";

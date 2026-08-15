@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidPassengerEmailInput } from "./email.ts";
 
 const ethiopianPhone = /^(?:\+251|251|0)?(7|9)\d{8}$/;
 
@@ -16,7 +17,7 @@ export const leadSubmissionSchema = z.object({
   idempotencyKey: z.uuid(),
   fullName: z.string().trim().min(2).max(100),
   phone: z.string().trim().min(9).max(24),
-  email: z.email().max(254).optional().or(z.literal("")),
+  email: z.string().max(254).refine(isValidPassengerEmailInput).optional(),
   interestedService: z.string().trim().max(200).optional(),
   consentGiven: z.literal(true),
   privacyNoticeVersion: z.string().trim().min(1).max(40),

@@ -34,6 +34,10 @@ test("lead form feedback covers required fields, email, and consent", () => {
     validatePassengerLeadFields({ fullName: "Abebe Kebede", phone: "0911234567", email: "", consent: true }),
     {},
   );
+  assert.match(
+    validatePassengerLeadFields({ fullName: "Abebe Kebede", phone: "0911234567", email: "አበበ123@example.com", consent: true }).email || "",
+    /valid email/i,
+  );
 });
 
 test("lead API errors map to safe passenger-facing messages", () => {
