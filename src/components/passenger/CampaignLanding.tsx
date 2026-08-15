@@ -23,8 +23,8 @@ export function CampaignLanding({campaign,qrToken}:{campaign:PublicCampaignViewM
           <section className="rounded-[26px] border border-[var(--passenger-line)] bg-white p-5 shadow-[0_14px_40px_rgba(82,36,24,.06)] sm:p-7">
             <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[.15em] text-[var(--passenger-primary)]"><Building2 className="size-4"/>About {company.name}</div>
             <h2 className="mt-4 text-3xl font-black leading-tight tracking-[-.035em]">{campaign.content.headline}</h2>
-            <p className="mt-4 text-base leading-7 text-[var(--passenger-muted)]">{company.description||campaign.content.description}</p>
-            {company.description&&campaign.content.description!==company.description&&<p className="mt-3 leading-7 text-[var(--passenger-muted)]">{campaign.content.description}</p>}
+            <p className="mt-4 text-base leading-7 text-[var(--passenger-muted)]">{campaign.content.description}</p>
+            {campaign.locale==="en"&&company.description&&campaign.content.description!==company.description&&<p className="mt-3 leading-7 text-[var(--passenger-muted)]">{company.description}</p>}
             {campaign.content.offer&&<div className="mt-5 flex gap-3 rounded-2xl bg-[var(--passenger-primary-soft)] p-4 text-sm text-[var(--passenger-primary-dark)]"><Gift className="mt-0.5 size-5 shrink-0"/><p className="font-semibold">{campaign.content.offer}</p></div>}
             <a href="#lead-form" className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[var(--passenger-primary)] px-5 py-3 font-bold text-white sm:w-auto">{campaign.content.callToAction}<ArrowDown className="size-4"/></a>
           </section>
