@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendOtpForLead } from "@/lib/otp/service";
+import { OtpProviderDeliveryError } from "@/lib/otp/errors";
 import {
   createFlowToken,
   hashDeviceFingerprint,
@@ -104,9 +105,10 @@ export async function POST(request: NextRequest) {
       flowToken,
       request,
     );
-  } catch {
+  } catch (error) {
+    const deliveryError = error instanceof OtpProviderDeliveryError ? error.code : "otp_delivery_failed";
     return responseWithFlowCookie(
-      { error: "otp_delivery_failed", leadId, delivery: "failed" },
+      { error: deliveryError, leadId, delivery: "failed" },
       502,
       flowToken,
       request,

@@ -25,3 +25,14 @@ const dictionaries: Record<PassengerLocale, PassengerDictionary> = {
 };
 
 export function passengerDictionary(locale: PassengerLocale) { return dictionaries[locale]; }
+
+const sandboxRecipientMessages: Record<PassengerLocale, string> = {
+  en: "The SMS sandbox only sends to a number registered in the Africa's Talking simulator. Use a simulator number or configure live SMS credentials.",
+  am: "የSMS ሳንድቦክስ በAfrica's Talking ሲሙሌተር ላይ ለተመዘገበ ቁጥር ብቻ ይልካል። የሲሙሌተር ቁጥር ይጠቀሙ ወይም የቀጥታ SMS መግቢያዎችን ያዋቅሩ።",
+  om: "SMS sandbox lakkoofsa simulator Africa's Talking keessatti galmaa'eef qofa erga. Lakkoofsa simulator fayyadami ykn ragaa SMS live qindeessi.",
+  ar: "ترسل بيئة اختبار الرسائل فقط إلى رقم مسجل في محاكي Africa's Talking. استخدم رقم المحاكي أو اضبط بيانات اعتماد الرسائل المباشرة.",
+};
+
+export function sandboxRecipientMessage(locale: PassengerLocale) {
+  return sandboxRecipientMessages[locale];
+}
