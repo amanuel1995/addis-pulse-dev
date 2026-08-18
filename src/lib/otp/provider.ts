@@ -68,9 +68,12 @@ class AfricaTalkingOtpProvider implements OtpProvider {
       throw new OtpProviderDeliveryError("provider_unavailable");
     }
     const recipient = response.SMSMessageData?.Recipients?.[0];
-    if (!recipient || recipient.status?.toLowerCase() !== "success") {
+    if (!recipient) {
+      throw new OtpProviderDeliveryError("provider_unavailable");
+    }
+    if (recipient.status?.toLowerCase() !== "success") {
       throw new OtpProviderDeliveryError(
-        classifyRecipientFailure({ username, status: recipient?.status }),
+        classifyRecipientFailure({ username, status: recipient.status }),
       );
     }
     return {
