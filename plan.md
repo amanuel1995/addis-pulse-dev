@@ -30,12 +30,35 @@ Milestones are large logical groupings. A single milestone can and should be spl
 
 > Goal: Admins can create advertisers, configure campaigns with rewards, register drivers, and assign permanent QRs.
 
-Branch: `feature/campaign-driver-mgmt`
+Implemented across `feature/complete-platform-interfaces`, `main`, and `feature/fix-passenger-media-branding` rather than the originally proposed `feature/campaign-driver-mgmt` branch.
 
-- [ ] Advertiser / company profile CRUD and logo upload using Supabase Storage
-- [ ] Campaign CRUD, localized campaign content, reward configuration, target zones, and budget
-- [ ] Driver registration and permanent `qr_codes` generation (`qr_type = 'driver'`, `public_path` resolves to active campaign)
-- [ ] Driver campaign assignments, with one active assignment per driver enforced by DB
+#### Completed
+
+- [x] Company creation, profile editing, status lifecycle, validation, and list UI
+- [x] Company logo upload to the `company-assets` Supabase Storage bucket
+- [x] Campaign creation, editing, status lifecycle, reward description, lead targets, vehicle targets, dates, and ETB budget
+- [x] Localized campaign-content upsert for English, Amharic, Afaan Oromo, and Arabic
+- [x] Campaign video management for Supabase uploads, YouTube, Vimeo, and Cloudinary
+- [x] Driver registration, validation, status lifecycle, and registry UI
+- [x] Permanent driver `qr_codes` creation on first assignment
+- [x] QR registry, downloadable QR rendering, status management, and public URL generation
+- [x] Public QR resolution through `resolve_driver_campaign(...)`
+- [x] Driver campaign assignment creation, history, and completion UI
+- [x] One active campaign per driver enforced in both the admin workflow and the `one_active_campaign_per_driver_uq` database index
+- [x] Database regression coverage for permanent driver QR constraints and one-active-assignment enforcement
+
+#### Remaining Milestone 2 Work
+
+- [ ] Add campaign-zone removal or deactivation; the current admin UI only adds zones
+- [ ] Add explicit localized-content activation/deactivation and version-history controls; the current workflow supports upsert and listing
+- [ ] Decide and document lifecycle semantics for deletion: retain soft archive/cancel behavior or add guarded hard deletion for draft records
+- [ ] Make driver QR creation and assignment insertion atomic so a failed assignment cannot leave a newly created QR without an assignment
+- [ ] Add automated tests for admin company, campaign, driver, assignment, logo-upload, and campaign-media server actions
+- [ ] Run authenticated staging smoke tests for company creation/logo upload, campaign setup/localization/zones/media, driver registration, QR download, assignment, reassignment, and public QR resolution
+
+### Milestone 2 Status
+
+**Functionally implemented, pending lifecycle polish and staging acceptance.** The core engine exists and the database enforces its most important assignment invariant. Milestone 2 should be considered complete only after the remaining mutation tests and authenticated staging workflow pass.
 
 ### Milestone 3: Admin Backoffice & Fraud Control
 
