@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { OtpCooldownError, sendOtpForLead } from "@/lib/otp/service";
+import { OtpProviderDeliveryError } from "@/lib/otp/errors";
 import { otpResendSchema } from "@/lib/passenger-flow/validation";
 import { verifyFlowToken } from "@/lib/passenger-flow/security";
 
@@ -49,6 +50,10 @@ export async function POST(request: NextRequest) {
     if (error instanceof OtpCooldownError) {
       return NextResponse.json({ error: "resend_cooldown" }, { status: 429 });
     }
-    return NextResponse.json({ error: "otp_delivery_failed" }, { status: 502 });
+    const deliveryError =
+      error instanceof OtpProviderDeliveryError
+        ? error.code
+        : "otp_delivery_failed";
+    return NextResponse.json({ error: deliveryError }, { status: 502 });
   }
 }

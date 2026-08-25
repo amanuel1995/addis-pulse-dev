@@ -35,7 +35,7 @@ export default async function CampaignsPage({ searchParams }: { searchParams: Pr
           <label className="mt-4 block text-sm font-bold">Landing headline<input className={input} name="headline" required /></label>
           <label className="mt-4 block text-sm font-bold">Offer<textarea className={`${input} min-h-20 py-3`} name="offerText" /></label>
           <label className="mt-4 block text-sm font-bold">Reward description<textarea className={`${input} min-h-20 py-3`} name="rewardDescription" /></label>
-          <label className="mt-4 block text-sm font-bold">Passenger privacy notice<textarea className={`${input} min-h-24 py-3`} name="privacyNotice" required defaultValue="By submitting, you consent to AddisPulse sharing your verified request with this campaign advertiser for follow-up." /></label>
+          <label className="mt-4 block text-sm font-bold">Passenger privacy notice<textarea className={`${input} min-h-24 py-3`} name="privacyNotice" required defaultValue="By submitting, you consent to RidePerk sharing your verified request with this campaign advertiser for follow-up." /></label>
           <button disabled={!companies?.length} className="mt-5 min-h-11 w-full rounded-xl bg-slate-950 px-4 font-black text-white hover:bg-red-900 disabled:opacity-50">Create draft campaign</button>
         </form>
 

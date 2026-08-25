@@ -59,4 +59,8 @@ test("requires consent and a valid idempotency key", () => {
       .success,
     false,
   );
+  assert.equal(
+    leadSubmissionSchema.safeParse({ ...base, email: "አበበ123@example.com" }).success,
+    false,
+  );
 });

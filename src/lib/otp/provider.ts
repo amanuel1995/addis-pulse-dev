@@ -5,6 +5,12 @@ import {
   resolveOtpProviderName,
   type OtpProviderName,
 } from "@/lib/otp/config";
+import {
+  classifyRecipientFailure,
+  OtpProviderDeliveryError,
+} from "@/lib/otp/errors";
+
+export { OtpProviderDeliveryError } from "@/lib/otp/errors";
 
 export type OtpDeliveryResult = {
   providerMessageId?: string;
@@ -51,15 +57,23 @@ class AfricaTalkingOtpProvider implements OtpProvider {
     const require = createRequire(import.meta.url);
     const factory = require("africastalking") as AfricaTalkingFactory;
     const sms = factory({ apiKey, username }).SMS;
-    const response = await sms.send({
-      to: [phoneE164],
-      senderId: process.env.AT_SENDER_ID || undefined,
-      message: `Your AddisPulse verification code is ${code}. It expires shortly.`,
-    });
+    let response: Awaited<ReturnType<SmsService["send"]>>;
+    try {
+      response = await sms.send({
+        to: [phoneE164],
+        senderId: username === "sandbox" ? undefined : process.env.AT_SENDER_ID || undefined,
+        message: `Your RidePerk verification code is ${code}. It expires shortly.`,
+      });
+    } catch {
+      throw new OtpProviderDeliveryError("provider_unavailable");
+    }
     const recipient = response.SMSMessageData?.Recipients?.[0];
-    if (!recipient || recipient.status?.toLowerCase() !== "success") {
-      throw new Error(
-        `Africa's Talking rejected the SMS (${recipient?.statusCode ?? "unknown"})`,
+    if (!recipient) {
+      throw new OtpProviderDeliveryError("provider_unavailable");
+    }
+    if (recipient.status?.toLowerCase() !== "success") {
+      throw new OtpProviderDeliveryError(
+        classifyRecipientFailure({ username, status: recipient.status }),
       );
     }
     return {

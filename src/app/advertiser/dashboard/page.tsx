@@ -16,7 +16,7 @@ export default async function AdvertiserDashboardPage() {
         <section className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-6">
           <h2 className="text-xl font-bold text-amber-950">Dashboard access unavailable</h2>
           <p className="mt-2 text-sm leading-6 text-amber-900">
-            You are signed in as <strong>{user.email || "an account without advertiser access"}</strong>. Sign out, then use the advertiser representative account supplied by AddisPulse.
+            You are signed in as <strong>{user.email || "an account without advertiser access"}</strong>. Sign out, then use the advertiser representative account supplied by RidePerk.
           </p>
         </section>
       </AdvertiserShell>

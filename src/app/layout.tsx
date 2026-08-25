@@ -1,13 +1,21 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: {
-    default: "AddisPulse Media",
-    template: "%s | AddisPulse Media",
+    default: "RidePerk",
+    template: "%s | RidePerk",
   },
   description: "QR-powered campaigns and passenger rewards in Addis Ababa.",
-  applicationName: "AddisPulse Media",
+  applicationName: "RidePerk",
+  icons: { icon: { url: "/favicon.svg", type: "image/svg+xml" }, apple: "/icon.png" },
+  openGraph: { title: "RidePerk", description: "QR-powered campaigns and passenger rewards in Addis Ababa.", siteName: "RidePerk", type: "website" },
+  twitter: { card: "summary_large_image", title: "RidePerk", description: "QR-powered campaigns and passenger rewards in Addis Ababa." },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#8d2114",
 };
 
 export default function RootLayout({

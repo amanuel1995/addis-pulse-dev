@@ -24,5 +24,5 @@ export async function GET(request: Request) {
     (leads || []).map((lead) => [lead.id, lead.companies?.name, lead.campaigns?.name, lead.full_name, lead.phone_e164, lead.email, lead.interested_service_text, lead.verification_status, lead.status, lead.created_at]),
   );
   const date = new Date().toISOString().slice(0, 10);
-  return new NextResponse(csv, { headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="addispulse-leads-${date}.csv"`, "Cache-Control": "private, no-store, max-age=0", "X-Content-Type-Options": "nosniff" } });
+  return new NextResponse(csv, { headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="rideperk-leads-${date}.csv"`, "Cache-Control": "private, no-store, max-age=0", "X-Content-Type-Options": "nosniff" } });
 }

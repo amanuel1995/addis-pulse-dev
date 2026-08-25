@@ -1,6 +1,6 @@
 # AddisPulse Media - Implementation Plan
 
-*Last updated: 2026-07-24 | Maintained by: Bluecore engineering*
+*Last updated: 2026-08-17 | Maintained by: Bluecore engineering*
 
 > Source of truth for branch creation, sprint planning, and progress tracking.
 > Cross-referenced with `docs/internal/architecture.md`, `docs/internal/addis_pulse_full_analysis.md`, and `docs/internal/schema_architecture_gap_analysis.md`.
@@ -30,12 +30,35 @@ Milestones are large logical groupings. A single milestone can and should be spl
 
 > Goal: Admins can create advertisers, configure campaigns with rewards, register drivers, and assign permanent QRs.
 
-Branch: `feature/campaign-driver-mgmt`
+Implemented across `feature/complete-platform-interfaces`, `main`, and `feature/fix-passenger-media-branding` rather than the originally proposed `feature/campaign-driver-mgmt` branch.
 
-- [ ] Advertiser / company profile CRUD and logo upload using Supabase Storage
-- [ ] Campaign CRUD, localized campaign content, reward configuration, target zones, and budget
-- [ ] Driver registration and permanent `qr_codes` generation (`qr_type = 'driver'`, `public_path` resolves to active campaign)
-- [ ] Driver campaign assignments, with one active assignment per driver enforced by DB
+#### Completed
+
+- [x] Company creation, profile editing, status lifecycle, validation, and list UI
+- [x] Company logo upload to the `company-assets` Supabase Storage bucket
+- [x] Campaign creation, editing, status lifecycle, reward description, lead targets, vehicle targets, dates, and ETB budget
+- [x] Localized campaign-content upsert for English, Amharic, Afaan Oromo, and Arabic
+- [x] Campaign video management for Supabase uploads, YouTube, Vimeo, and Cloudinary
+- [x] Driver registration, validation, status lifecycle, and registry UI
+- [x] Permanent driver `qr_codes` creation on first assignment
+- [x] QR registry, downloadable QR rendering, status management, and public URL generation
+- [x] Public QR resolution through `resolve_driver_campaign(...)`
+- [x] Driver campaign assignment creation, history, and completion UI
+- [x] One active campaign per driver enforced in both the admin workflow and the `one_active_campaign_per_driver_uq` database index
+- [x] Database regression coverage for permanent driver QR constraints and one-active-assignment enforcement
+
+#### Remaining Milestone 2 Work
+
+- [ ] Add campaign-zone removal or deactivation; the current admin UI only adds zones
+- [ ] Add explicit localized-content activation/deactivation and version-history controls; the current workflow supports upsert and listing
+- [ ] Decide and document lifecycle semantics for deletion: retain soft archive/cancel behavior or add guarded hard deletion for draft records
+- [ ] Make driver QR creation and assignment insertion atomic so a failed assignment cannot leave a newly created QR without an assignment
+- [ ] Add automated tests for admin company, campaign, driver, assignment, logo-upload, and campaign-media server actions
+- [ ] Run authenticated staging smoke tests for company creation/logo upload, campaign setup/localization/zones/media, driver registration, QR download, assignment, reassignment, and public QR resolution
+
+### Milestone 2 Status
+
+**Functionally implemented, pending lifecycle polish and staging acceptance.** The core engine exists and the database enforces its most important assignment invariant. Milestone 2 should be considered complete only after the remaining mutation tests and authenticated staging workflow pass.
 
 ### Milestone 3: Admin Backoffice & Fraud Control
 
@@ -61,11 +84,38 @@ Branch: `feature/client-driver-portals`
 
 ---
 
-## Current Sprint - Milestone 1 Release Candidate: `feature/m1-release-candidate`
+## Current Sprint - Passenger Experience Hardening: `feature/fix-passenger-media-branding`
 
-> Goal: A passenger who scans a QR code can submit their name and phone, receive an OTP SMS via Africa's Talking, verify it, and land on a thank-you screen. No lead is counted as `otp_verified` without phone confirmation.
+> Goal: Finish the passenger-facing RidePerk experience, make campaign media reliable on mobile, and make OTP delivery failures safe and actionable before staging review.
 
-The foundational v4 migration is merged. It is immutable; all later database changes must be incremental migrations. The release candidate is intended for Vercel Preview connected to staging Supabase. It also includes a deliberately narrow `/advertiser/dashboard` for authenticated company representatives with `can_view_leads`, using RLS-protected Realtime inserts and updates. Full advertiser portal work remains Milestone 4.
+This branch includes the completed Milestone 1 release-candidate work plus the RidePerk brand refresh, richer campaign media support, passenger validation improvements, and OTP delivery hardening. It is synchronized with `origin/main` and pushed to `origin/feature/fix-passenger-media-branding`. The remaining work is environment validation and review rather than additional feature expansion.
+
+### Accomplished In This Sprint
+
+- [x] Complete RidePerk rebrand across passenger, admin, advertiser, favicon, manifest, and social-image surfaces
+- [x] Support embedded, external, and directly uploaded campaign videos
+- [x] Add admin campaign media upload and management interfaces
+- [x] Restore stable campaign-video header colors independent of campaign theme variables
+- [x] Give embedded, linked, and direct videos an explicit mobile height while preserving responsive 16:9 layout on larger screens
+- [x] Improve mobile navigation and passenger layouts
+- [x] Add passenger email normalization and validation coverage
+- [x] Add visible phone-verification steps to the lead and OTP flow
+- [x] Add typed Africa's Talking delivery errors for unavailable, rejected, and sandbox-recipient failures
+- [x] Return consistent OTP delivery errors from initial-send and resend API routes
+- [x] Localize sandbox simulator guidance in English, Amharic, Afaan Oromo, and Arabic
+- [x] Add OTP error-classification and localization tests
+- [x] Merge the latest `origin/main` into the feature branch without conflicts
+- [x] Pass 40 automated tests, TypeScript, ESLint, and the Next.js production build
+
+### Next Actions
+
+- [ ] Regenerate or replace the rejected Africa's Talking Sandbox API key (`401 Unauthorized` during validation)
+- [ ] Register and keep active an Africa's Talking simulator phone number
+- [ ] Complete one end-to-end sandbox OTP delivery and verification test
+- [ ] Complete a mobile browser smoke test for embedded, external, and direct campaign videos
+- [ ] Verify the Vercel Preview environment uses staging Supabase and valid OTP provider variables
+- [ ] Open or update the PR against `main`, attach validation evidence, and request review
+- [ ] After approval, merge the PR and run a post-deployment passenger-flow smoke test
 
 ### UI Components
 
@@ -139,10 +189,13 @@ The foundational v4 migration is merged. It is immutable; all later database cha
 - [x] Full flow implemented end to end: scan -> form -> OTP SMS -> verify -> `otp_verified` in DB
 - [x] Invalid, expired, and exhausted OTP states show user-facing errors
 - [x] Inactive or invalid driver token routes to the correct unavailable/not-found state
+- [x] Campaign videos remain visible at a compact height on mobile
+- [x] OTP provider failures return safe, localized passenger-facing guidance
+- [x] Automated tests, TypeScript, ESLint, and production build pass on the final branch
 - [ ] Complete visual/manual local browser smoke test
 - [ ] Complete one controlled staging Africa's Talking SMS check
 - [ ] Verify Vercel Preview uses staging Supabase variables
-- [ ] Draft PR from `feature/m1-release-candidate` opened against `main`
+- [ ] PR from `feature/fix-passenger-media-branding` opened or updated against `main` and review requested
 
 ---
 
@@ -158,3 +211,4 @@ The foundational v4 migration is merged. It is immutable; all later database cha
 | 2026-07-09 | Milestone restructuring | Shifted from 10-week chronological plan to 4 logical feature milestones. |
 | 2026-07-10 | v4 schema direction selected | Use the enterprise v4 schema as the target direction; keep `qr_codes` model and add `resolve_driver_campaign()` compatibility for architecture/app alignment. |
 | 2026-07-24 | Milestone 1 release-candidate integration | Preserve production OTP/security work, reconcile the stronger passenger UI, and add only minimum protected advertiser Realtime visibility. |
+| 2026-08-17 | Passenger experience hardening | Complete RidePerk branding, mobile campaign media visibility, validation, and actionable OTP delivery errors before staging review. |

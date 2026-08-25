@@ -11,7 +11,7 @@ import {
   shouldShowCampaignMedia,
   validatePassengerLeadFields,
 } from "../src/lib/passenger-flow/ui.ts";
-import { passengerDictionary, passengerLocale } from "../src/lib/passenger-flow/i18n.ts";
+import { passengerDictionary, passengerLocale, sandboxRecipientMessage } from "../src/lib/passenger-flow/i18n.ts";
 
 test("passenger phone feedback accepts Ethiopian local mobile formats", () => {
   assert.equal(isValidPassengerPhoneInput("0911 234 567"), true);
@@ -33,6 +33,10 @@ test("lead form feedback covers required fields, email, and consent", () => {
   assert.deepEqual(
     validatePassengerLeadFields({ fullName: "Abebe Kebede", phone: "0911234567", email: "", consent: true }),
     {},
+  );
+  assert.match(
+    validatePassengerLeadFields({ fullName: "Abebe Kebede", phone: "0911234567", email: "አበበ123@example.com", consent: true }).email || "",
+    /valid email/i,
   );
 });
 
@@ -59,6 +63,13 @@ test("campaign media fallback is selected when media is absent", () => {
   assert.equal(shouldShowCampaignMedia(undefined), false);
   assert.equal(shouldShowCampaignMedia(null), false);
   assert.equal(shouldShowCampaignMedia("https://example.test/video.mp4"), true);
+});
+
+test("sandbox recipient guidance is localized", () => {
+  assert.match(sandboxRecipientMessage("en"), /simulator/i);
+  assert.notEqual(sandboxRecipientMessage("am"), sandboxRecipientMessage("en"));
+  assert.notEqual(sandboxRecipientMessage("om"), sandboxRecipientMessage("en"));
+  assert.notEqual(sandboxRecipientMessage("ar"), sandboxRecipientMessage("en"));
 });
 
 test("campaign video links convert to safe provider embeds", () => {

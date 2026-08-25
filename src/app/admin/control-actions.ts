@@ -75,13 +75,6 @@ export async function handleDeletionRequest(fd: FormData) { const actor=await re
 
 export async function retryNotification(fd: FormData) { await requirePlatformAdmin(); const id=uuid.safeParse(text(fd,"id")); if(!id.success) done("/admin/notifications","error","Invalid job."); const {error}=await createAdminClient().from("notification_jobs").update({status:"retry",next_attempt_at:new Date().toISOString(),locked_at:null,locked_by:null,last_error:null}).eq("id",id.data).in("status",["dead_letter","cancelled","retry"]); if(error) done("/admin/notifications","error",error.message); done("/admin/notifications","message","Notification queued for retry."); }
 
-export async function addCampaignVideo(fd: FormData) {
-  const actor = await requirePlatformAdmin(); const campaignId = uuid.safeParse(text(fd,"campaignId")); const provider = z.enum(["youtube","vimeo","cloudinary"]).safeParse(text(fd,"provider")); const duration = z.coerce.number().int().min(30).max(50).safeParse(text(fd,"duration"));
-  if(!campaignId.success||!provider.success||!duration.success||!z.url().safeParse(text(fd,"url")).success) done("/admin/media","error","Use a valid video URL and duration from 30 to 50 seconds.");
-  const admin=createAdminClient(); const activate=text(fd,"active")==="on"; if(activate) await admin.from("campaign_videos").update({active:false}).eq("campaign_id",campaignId.data).eq("active",true);
-  const{error}=await admin.from("campaign_videos").insert({campaign_id:campaignId.data,provider:provider.data,video_url:text(fd,"url"),duration_seconds:duration.data,caption:text(fd,"caption")||null,active:activate,validated_at:new Date().toISOString(),validated_by:actor.id,created_by:actor.id}); if(error) done("/admin/media","error",error.message); done("/admin/media","message","Campaign video saved and validated.");
-}
-
 export async function updateReward(fd: FormData) {
   const actor=await requirePlatformAdmin(); const id=uuid.safeParse(text(fd,"id")); const status=z.enum(["pending","issued","redeemed","expired","cancelled"]).safeParse(text(fd,"status")); if(!id.success||!status.success) done("/admin/rewards","error","Invalid reward update."); const now=new Date().toISOString();
   const patch=status.data==="issued"?{status:status.data,issued_at:now,issued_by:actor.id,external_reference:text(fd,"reference")||null}:status.data==="redeemed"?{status:status.data,issued_at:now,redeemed_at:now,redeemed_by:actor.id}:status.data==="cancelled"?{status:status.data,cancelled_at:now,cancellation_reason:text(fd,"reason")||"Cancelled by administrator"}:{status:status.data};
